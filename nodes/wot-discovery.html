@@ -1,7 +1,7 @@
 <script type="text/javascript">
-    RED.nodes.registerType('lower-case',{
-        category: 'function',
-        color: '#a6bbcf',
+    RED.nodes.registerType('wot-discovery',{
+        category: 'Web of Things',
+        color: 'rgb(95, 162, 162)',
         defaults: {
             name: {value:""}
         },
@@ -9,7 +9,7 @@
         outputs:1,
         icon: "file.png",
         label: function() {
-            return this.name||"lower-case";
+            return this.name||"wot-discovery";
         }
     });
 </script>
