@@ -1,0 +1,34 @@
+{
+  "name": "red-contrib-wot-discovery",
+  "version": "1.0.0",
+  "description": "An experimental Node-RED package for Discovery in the Web of Things (WoT).",
+  "main": "index.js",
+  "node-red": {
+    "nodes": {
+      "wot-discovery": "nodes/wot-discovery.js",
+      "wot-dashboard": "nodes/wot-dashboard.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JKRhb/node-red-contrib-wot-discovery.git"
+  },
+  "keywords": [
+    "web-of-things",
+    "node-red",
+    "coap",
+    "mqtt"
+  ],
+  "author": "Jan Romann",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JKRhb/node-red-contrib-wot-discovery/issues"
+  },
+  "homepage": "https://github.com/JKRhb/node-red-contrib-wot-discovery#readme",
+  "dependencies": {
+    "coap": "github:mcollina/node-coap"
+  }
+}
