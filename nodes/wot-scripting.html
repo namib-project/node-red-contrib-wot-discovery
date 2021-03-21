@@ -1,0 +1,111 @@
+<script type="text/javascript">
+
+    const allowedOperations = ["readProperty", "writeProperty", "observeProperty", "invokeAction", "subscribeEvent"]
+    const operationsWithInput = ["writeProperty", "invokeAction",]
+
+    RED.nodes.registerType('wot-scripting',{
+        category: 'Web of Things',
+        color: 'rgb(95, 162, 162)',
+        defaults: {
+            name: {value:""},
+            operationType: {
+                validate: function (v) {
+                    return (
+                        allowedOperations.indexOf(v) !== -1
+                    );
+                },
+                required: true
+            },
+            affordanceName: {value: ""},
+            affordanceType: {value: ""},
+            inputValue: {value: ""},
+            filterMode: {value:"affordanceName"},
+        },
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name||"wot-scripting";
+        },
+        oneditprepare: function () {
+            $("#node-input-filterMode").on("change", function() {
+                let val = $(this).val();
+                if (val == "affordanceName") {
+                    $(".node-input-affordanceName-row").show();
+                    $(".node-input-affordanceType-row").hide();
+                } else if (val == "@type")  {
+                    $(".node-input-affordanceName-row").hide();
+                    $(".node-input-affordanceType-row").show();
+                } else {
+                    $(".node-input-affordanceName-row").show();
+                    $(".node-input-affordanceType-row").show();
+                }
+            });
+
+            $("#node-input-inputValue").typedInput({
+                type:"str",
+                types:["str","num","bool", "json"],
+                typeField: "#node-input-inputValue-type"
+            });
+
+            $("#node-input-operationType").on("change", function() {
+                let val = $(this).val();
+                if (operationsWithInput.includes(val)) {
+                    $(".node-input-inputValue-row").show();
+                } else {
+                    $(".node-input-inputValue-row").hide();
+                }
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="wot-scripting">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-operationType"><i class="fa fa-tasks"></i> Operation Type</label>
+        <select id="node-input-operationType">
+            <option value="readProperty">readProperty</option>
+            <option value="writeProperty">writeProperty</option>
+            <option value="observeProperty">observeProperty</option>
+            <option value="invokeAction">invokeAction</option>
+            <option value="subscribeEvent">subscribeEvent</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-filterMode"><i class="fa fa-tasks"></i> Trigger affordance by:</label>
+        <select id="node-input-filterMode">
+            <option value="affordanceName">Affordance name</option>
+            <option value="@type">@type field</option>
+            <option value="both">Both</option>
+        </select>
+    </div>
+
+    <div class="form-row node-input-affordanceName-row hide">
+        <label for="node-input-affordanceName"><i class="fa fa-tag"></i> Affordance Name</label>
+        <input type="text" id="node-input-affordanceName">
+    </div>
+
+    <div class="form-row node-input-affordanceType-row hide">
+        <label for="node-input-affordanceType"><i class="fa fa-tag"></i> @type</label>
+        <input type="text" id="node-input-affordanceType">
+    </div>
+
+    <!-- TODO: Improve usage of input values -->
+
+    <div class="form-row node-input-inputValue-row hide">
+        <label for="node-input-inputValue"><i class="fa fa-tag"></i> Input value</label>
+        <input type="text" id="node-input-inputValue">
+        <input type="hidden" id="node-input-inputValue-type">
+    </div>
+
+</script>
+
+<script type="text/html" data-help-name="wot-scripting">
+    <p>A simple node that converts the message payloads into all lower-case characters</p>
+</script>

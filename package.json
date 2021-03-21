@@ -6,7 +6,7 @@
   "node-red": {
     "nodes": {
       "wot-discovery": "nodes/wot-discovery.js",
-      "wot-dashboard": "nodes/wot-dashboard.js"
+      "wot-scripting": "nodes/wot-scripting.js"
     }
   },
   "scripts": {
@@ -30,5 +30,9 @@
   "homepage": "https://github.com/JKRhb/node-red-contrib-wot-discovery#readme",
   "dependencies": {
     "coap": "github:mcollina/node-coap"
+    "@node-wot/binding-coap": "^0.7.5",
+    "@node-wot/binding-http": "^0.7.5",
+    "@node-wot/binding-mqtt": "^0.7.5",
+    "@node-wot/core": "^0.7.5",
   }
 }
