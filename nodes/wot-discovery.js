@@ -1,45 +1,119 @@
 module.exports = function(RED) {
-    "use strict";
     var coap = require("coap");
     var url = require("uri-js");
 
     function WoTDiscoveryNode(config) {
-        RED.nodes.createNode(this,config);
+        RED.nodes.createNode(this, config);
         var node = this;
+        var coapAddresses;
 
-        var multicastReponse = null;
-        var reqOpts = url.parse("coap://[ff02::1]/.well-known/wot-thing-description");
-        reqOpts.method = "GET";
-        // reqOpts.headers = {};
-        // reqOpts.headers["Content-Format"] = "application/json";
-        reqOpts.multicast = true;
+        var contextVarKey = config.contextVar || "thingDescriptions";
+        var contextVarType = config.contextVarType;
+        var tdMsgProperty = config.msgProperty || "thingDescription";
 
+        // Add Implementations for MQTT and HTTP
+
+        if (config.useCoap) {
+            coapAddresses = _getCoapAddresses(config);
+        }
+
+        if (config.msgOrContext === "context") {
+            let contextVar = _getContextVar();
+            if (!contextVar.get(contextVarKey)) {
+                contextVar.set(contextVarKey, {});
+            }
+        }
 
         node.on('input', function(msg) {
+            if (coapAddresses) {
+                coapAddresses.forEach(address => {
+                    _sendCoapDiscovery(address);
+                });
+            }
+        });
+
+        function _processThingDescription(thingDescription) {
+            // TODO: Allow both for sending as message and storing in context
+            if (config.msgOrContext === "msg") {
+                let message = {};
+                message[tdMsgProperty] = thingDescription;
+                node.send(message);
+            } else if (config.msgOrContext === "context") { 
+                let contextVar;
+                if (contextVarType === "flow") {
+                    contextVar = node.context().flow;
+                } else if (contextVarType === "global") {
+                    contextVar = node.context().global;
+                } else {
+                    node.error("Could not retrieve context variable.");
+                    return;
+                }
+                let storedTDs = contextVar.get(contextVarKey);
+                storedTDs[thingDescription.base] = thingDescription;
+                if (config.timeoutRemoval) {
+                    setTimeout(() => {
+                        delete storedTDs[thingDescription.base];
+                    }, config.removalTime * 60 * 60 * 1000);
+                }
+            }
+        }
+
+        function _getContextVar() {
+            if (contextVarType === "flow") {
+                return node.context().flow;
+            } else if (contextVarType === "global") {
+                return node.context().global;
+            }
+            return null;
+        }
+
+        function _onResponse(res) {
+            res.on("data", data => {
+                if (res.headers["Content-Format"] === "application/json") {
+                    try {
+                        var thingDescription = JSON.parse(data.toString());
+                        _processThingDescription(thingDescription)
+                    } catch (error) {
+                        node.error(error.message);
+                    }
+                }
+            });
+        }
+
+        function _sendCoapDiscovery(address) {
+            var reqOpts = url.parse(`coap://${address}/.well-known/wot-thing-description`);
+            reqOpts.pathname = reqOpts.path;
+            reqOpts.method = "GET";
+            reqOpts.multicast = true;
             var req = coap.request(reqOpts);
             req.on("response", _onResponse);
             req.on("error", function (err) {
                 node.log("client error");
                 node.log(err);
             });
+            req.end();
+        }
 
-            // msg.payload = msg.payload.toLowerCase();
-            // node.send(msg);
-        });
+        function _getCoapAddresses(config) {
+            let addresses = [];
 
-        function _onResponse(res) {
-            multicastReponse = res;
-            res.on("data", data => {
-                if (res.headers["Content-Format"] === "application/json") {
-                    try {
-                        var payload = JSON.parse(data.toString());
-                        node.send({payload: payload});
-                    } catch (error) {
-                        node.error(error.message);
-                    }
+            if (config.coapUseIPv6) {
+                if (config.coapIPv6Address == "all") {
+                    addresses.push("[ff02::1]");
+                } else if (config.coapIPv6Address == "coapOnly") {
+                    addresses.push("[ff02::fd]");
                 }
-            });
+            }
 
+            if (config.coapUseIPv4) {
+                if (config.coapIPv6Address == "all") {
+                    addresses.push("224.0.0.1");
+                } else if (config.coapIPv6Address == "coapOnly") {
+                    addresses.push("224.0.1.187");
+                }
+            }
+
+            return addresses;
         }
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);

@@ -29,10 +29,10 @@
   },
   "homepage": "https://github.com/JKRhb/node-red-contrib-wot-discovery#readme",
   "dependencies": {
-    "coap": "github:mcollina/node-coap"
     "@node-wot/binding-coap": "^0.7.5",
     "@node-wot/binding-http": "^0.7.5",
     "@node-wot/binding-mqtt": "^0.7.5",
     "@node-wot/core": "^0.7.5",
+    "coap": "github:JKRhb/node-coap#multicast-blockwise-timeout"
   }
 }

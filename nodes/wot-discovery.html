@@ -1,26 +1,277 @@
 <script type="text/javascript">
-    RED.nodes.registerType('wot-discovery',{
-        category: 'Web of Things',
-        color: 'rgb(95, 162, 162)',
+    RED.nodes.registerType("wot-discovery", {
+        category: "Web of Things",
+        color: "rgb(95, 162, 162)",
         defaults: {
-            name: {value:""}
+            name: { value: "" },
+            useCoap: { value: true },
+            coapUseIPv6: { value: true },
+            coapIPv6Address: { value: "all" },
+            coapUseIPv4: { value: false },
+            coapIPv4Address: { value: "all" },
+            useMqtt: { value: "" },
+            mqttBrokerAddress: { value: "" },
+            useHttp: { value: true },
+            httpUseIPv6: { value: true },
+            httpUseIPv4: { value: false },
+            timeoutRemoval: { value: true },
+            removalTime: { value: 15 },
+            msgOrContext: { value: "msg" },
+            msgProperty: { value: "" },
+            msgPropertyType: { value: "msg" },
+            contextVar: { value: "" },
+            contextVarType: { value: "flow" },
+            deleteExistingTDs: { value: true },
         },
-        inputs:1,
-        outputs:1,
+        inputs: 1,
+        outputs: 1,
         icon: "file.png",
-        label: function() {
-            return this.name||"wot-discovery";
-        }
+        label: function () {
+            return this.name || "wot-discovery";
+        },
+        oneditprepare: function () {
+            $("#node-input-contextVar").typedInput({
+                type: "flow",
+                types: ["flow", "global"],
+                typeField: "#node-input-contextVarType",
+            });
+
+            $("#node-input-msgProperty").typedInput({
+                type: "msg",
+                types: ["msg"],
+                typeField: "#node-input-msgPropertyType",
+            });
+
+            $("#node-input-msgOrContext").on("change", function () {
+                let val = $(this).val();
+                if (val == "msg") {
+                    $(".node-input-msgProperty-row").show();
+                    $(".node-input-contextVar-row").hide();
+                } else if (val == "context") {
+                    $(".node-input-msgProperty-row").hide();
+                    $(".node-input-contextVar-row").show();
+                }
+            });
+
+            function updateRemovalTimeOptions() {
+                if ($("#node-input-timeoutRemoval").is(":checked")) {
+                    $("#node-input-removalTime-row").show();
+                } else {
+                    $("#node-input-removalTime-row").hide();
+                }
+            }
+            if (this.timeoutRemoval) {
+                $("#node-input-timeoutRemoval").prop("checked", true);
+            } else {
+                $("#node-input-timeoutRemoval").prop("checked", false);
+            }
+            updateRemovalTimeOptions();
+            $("#node-input-timeoutRemoval").on("click", function () {
+                updateRemovalTimeOptions();
+            });
+
+            function updateCoapOptions() {
+                if ($("#node-input-useCoap").is(":checked")) {
+                    $("#node-input-coapUseIPv6-row").show();
+                    $("#node-input-coapUseIPv4-row").show();
+                } else {
+                    $("#node-input-coapUseIPv6-row").hide();
+                    $("#node-input-coapUseIPv4-row").hide();
+                }
+            }
+            if (this.useCoap) {
+                $("#node-input-useCoap").prop("checked", true);
+            } else {
+                $("#node-input-useCoap").prop("checked", false);
+            }
+            updateCoapOptions();
+            $("#node-input-useCoap").on("click", function () {
+                updateCoapOptions();
+            });
+        },
     });
 </script>
 
-<script type="text/html" data-template-name="lower-case">
+<script type="text/html" data-template-name="wot-discovery">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="Name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-msgOrContext"
+            ><i class="fa fa-tasks"></i> Save in msg or context?</label
+        >
+        <select id="node-input-msgOrContext">
+            <option value="msg">Message</option>
+            <option value="context">Context</option>
+        </select>
+    </div>
+
+    <div class="form-row node-input-msgProperty-row hide">
+        <label for="node-input-msgProperty"><i class="fa fa-tag"></i> Message property</label>
+        <input type="text" id="node-input-msgProperty" placeholder="thingDescription"/>
+        <input type="hidden" id="node-input-msgPropertyType" />
+    </div>
+
+    <div class="form-row node-input-contextVar-row hide">
+        <label for="node-input-contextVar"><i class="fa fa-tag"></i> Context field</label>
+        <input type="text" id="node-input-contextVar" placeholder="thingDescriptions"/>
+        <input type="hidden" id="node-input-contextVarType" />
+    </div>
+
+    <!-- TODO: If flow/global variable is chosen, disable output -->
+    <!-- TODO: Fix formatting of settings -->
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-timeoutRemoval"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-timeoutRemoval" style="width: auto">
+            Remove TDs after timeout
+        </label>
+        <div id="node-input-removalTime-row" class="hide">
+            <label
+                style="width: auto; margin-left: 20px; margin-right: 10px;"
+                for="node-input-removalTime"
+            >
+                <i class="fa fa-clock-o"></i>
+                Timeout interval
+            </label>
+            <input
+                style="width: 270px"
+                type="text"
+                id="node-input-removalTime"
+                placeholder="15"
+            />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-deleteExistingTDs"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-deleteExistingTDs" style="width: auto">
+            Remove TDs on input
+        </label>
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-useCoap"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-useCoap" style="width: auto">
+            Use CoAP for discovery
+        </label>
+
+        <div id="node-input-coapUseIPv6-row">
+            <input
+                type="checkbox"
+                id="node-input-coapUseIPv6"
+                style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-coapUseIPv6" style="width: auto">
+                Use IPv6 multicast
+            </label>
+
+            <div id="node-input-coapIPv6Address-row">
+                <label for="node-input-coapIPv6Address"
+                    ><i class="fa fa-tasks"></i> Send to:</label
+                >
+                <select id="node-input-coapIPv6Address">
+                    <option value="all">All IPv6 devices</option>
+                    <option value="coapOnly">Only CoAP devices</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="node-input-coapUseIPv4-row">
+            <input
+                type="checkbox"
+                id="node-input-coapUseIPv4"
+                style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-coapUseIPv4" style="width: auto">
+                Use IPv4 multicast
+            </label>
+
+            <div id="node-input-coapIPv4Address-row">
+                <label for="node-input-coapIPv4Address"
+                    ><i class="fa fa-tasks"></i> Send to:</label
+                >
+                <select id="node-input-coapIPv4Address">
+                    <option value="all">All IPv4 devices</option>
+                    <option value="coapOnly">Only CoAP devices</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-useMqtt"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-useMqtt" style="width: auto">
+            Use MQTT for discovery
+        </label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mqttBrokerAddress"
+            ><i class="fa fa-tag"></i> Broker address</label
+        >
+        <input
+            type="text"
+            id="node-input-mqttBrokerAddress"
+            placeholder="mqtt://"
+        />
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-useHttp"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-useHttp" style="width: auto">
+            Use HTTP for discovery
+        </label>
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-httpUseIPv6"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-httpUseIPv6" style="width: auto">
+            Use IPv6 multicast
+        </label>
+    </div>
+
+    <div class="form-row">
+        <input
+            type="checkbox"
+            id="node-input-httpUseIPv4"
+            style="display: inline-block; width: auto; vertical-align: top;"
+        />
+        <label for="node-input-httpUseIPv4" style="width: auto">
+            Use IPv4 multicast
+        </label>
     </div>
 </script>
 
-<script type="text/html" data-help-name="lower-case">
-    <p>A simple node that converts the message payloads into all lower-case characters</p>
+<script type="text/html" data-help-name="wot-discovery">
+    <p>
+        A simple node that converts the message payloads into all lower-case
+        characters
+    </p>
 </script>
