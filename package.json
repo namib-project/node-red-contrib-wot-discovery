@@ -33,6 +33,6 @@
     "@node-wot/binding-http": "^0.7.5",
     "@node-wot/binding-mqtt": "^0.7.5",
     "@node-wot/core": "^0.7.5",
-    "coap": "github:JKRhb/node-coap#multicast-blockwise-timeout"
+    "coap": "github:mcollina/node-coap"
   }
 }
