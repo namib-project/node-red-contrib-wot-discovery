@@ -12,6 +12,8 @@ module.exports = function(RED) {
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
 
+        var timeouts = {};
+
         // Add Implementations for MQTT and HTTP
 
         if (config.useCoap) {
@@ -53,8 +55,11 @@ module.exports = function(RED) {
                 let identifier = _getTDIdentifier(thingDescription);
                 storedTDs[identifier] = thingDescription;
                 if (config.timeoutRemoval) {
-                    setTimeout(() => {
-                        delete storedTDs[thingDescription.base];
+                    if (timeouts[identifier]) {
+                        clearTimeout(timeouts[identifier]);
+                    }
+                    timeouts[identifier] = setTimeout(() => {
+                        delete storedTDs[identifier];
                     }, config.removalTime * 60 * 60 * 1000);
                 }
             }
