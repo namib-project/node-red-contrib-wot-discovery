@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
     "use strict";
     const { Servient, Helpers } = require("@node-wot/core");
     const { HttpClientFactory } = require('@node-wot/binding-http');
@@ -17,8 +17,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
         var node = this;
 
-
-        node.on('input', function(msg) {
+        node.on('input', function (msg) {
 
             var operationType = config.operationType || msg.operationType;
             var affordanceName = config.affordanceName || msg.affordanceName;
@@ -46,7 +45,7 @@ module.exports = function(RED) {
                     let affordance = affordances[name];
                     let types = affordance["@type"];
                     // TODO: Refactor string to array conversion
-                    if (typeof(types) === 'string') {
+                    if (typeof (types) === 'string') {
                         affordanceTypes.push(types);
                     } else if (types instanceof Array) {
                         affordanceTypes = types;
@@ -74,8 +73,8 @@ module.exports = function(RED) {
                     return;
                 }
             } else if (filterMode !== "@type") {
-               node.error(`Illegal filter mode "${filtermode}" defined!`);
-               return;
+                node.error(`Illegal filter mode "${filtermode}" defined!`);
+                return;
             }
 
             try {
@@ -94,51 +93,51 @@ module.exports = function(RED) {
 
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue) {
 
-                    switch (operationType) {
-                        case "readProperty":
-                            thing.readProperty(affordanceName).then(property => {
-                                msg.payload = property;
-                                node.send(msg);
-                            }).catch(error => node.error(error));
-                            break;
-                        case "writeProperty":
-                            if (!inputValue) {
-                                node.error("No input value given!");
-                                return;
-                            }
-                            thing.writeProperty(affordanceName, inputValue).then(property => {
-                                msg.payload = property;
-                                node.send(msg);
-                            }).catch(error => node.error(error));
-                            break;
-                        case "observeProperty":
-                            thing.observeProperty(affordanceName).then(property => {
-                                msg.payload = property;
-                                node.send(msg);
-                            }).catch(error => node.error(error));
-                            break;
-                        case "invokeAction":
-                            let invokedAction;
-                            if (inputValue) {
-                                invokedAction = thing.invokeAction(affordanceName, inputValue);
-                            } else {
-                                invokedAction = thing.invokeAction(affordanceName);
-                            }
-                            invokedAction.then(property => {
-                                msg.payload = property;
-                                node.send(msg);
-                            }).catch(error => node.error(error));
-                            break;
-                        case "subscribeEvent":
-                            thing.subscribeEvent(affordanceName).then(property => {
-                                msg.payload = property;
-                                node.send(msg);
-                            }).catch(error => node.error(error));
-                            break;
-                    
-                        default:
-                            break;
+            switch (operationType) {
+                case "readProperty":
+                    thing.readProperty(affordanceName).then(property => {
+                        msg.payload = property;
+                        node.send(msg);
+                    }).catch(error => node.error(error));
+                    break;
+                case "writeProperty":
+                    if (!inputValue) {
+                        node.error("No input value given!");
+                        return;
                     }
+                    thing.writeProperty(affordanceName, inputValue).then(property => {
+                        msg.payload = property;
+                        node.send(msg);
+                    }).catch(error => node.error(error));
+                    break;
+                case "observeProperty":
+                    thing.observeProperty(affordanceName).then(property => {
+                        msg.payload = property;
+                        node.send(msg);
+                    }).catch(error => node.error(error));
+                    break;
+                case "invokeAction":
+                    let invokedAction;
+                    if (inputValue) {
+                        invokedAction = thing.invokeAction(affordanceName, inputValue);
+                    } else {
+                        invokedAction = thing.invokeAction(affordanceName);
+                    }
+                    invokedAction.then(property => {
+                        msg.payload = property;
+                        node.send(msg);
+                    }).catch(error => node.error(error));
+                    break;
+                case "subscribeEvent":
+                    thing.subscribeEvent(affordanceName).then(property => {
+                        msg.payload = property;
+                        node.send(msg);
+                    }).catch(error => node.error(error));
+                    break;
+
+                default:
+                    break;
+            }
         }
 
     }
