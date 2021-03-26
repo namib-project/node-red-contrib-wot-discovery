@@ -50,7 +50,8 @@ module.exports = function(RED) {
                     return;
                 }
                 let storedTDs = contextVar.get(contextVarKey);
-                storedTDs[thingDescription.base] = thingDescription;
+                let identifier = _getTDIdentifier(thingDescription);
+                storedTDs[identifier] = thingDescription;
                 if (config.timeoutRemoval) {
                     setTimeout(() => {
                         delete storedTDs[thingDescription.base];
@@ -79,6 +80,11 @@ module.exports = function(RED) {
                     }
                 }
             });
+        }
+
+        function _getTDIdentifier(thingDescription) {
+            let identifier = thingDescription.id || thingDescription.base || thingDescription.title;
+            return identifier
         }
 
         function _sendCoapDiscovery(address) {
