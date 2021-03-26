@@ -10,6 +10,7 @@ module.exports = function(RED) {
         var contextVarKey = config.contextVar || "thingDescriptions";
         var contextVarType = config.contextVarType;
         var tdMsgProperty = config.msgProperty || "thingDescription";
+        var msgOrContext = config.msgOrContext;
 
         // Add Implementations for MQTT and HTTP
 
@@ -17,7 +18,7 @@ module.exports = function(RED) {
             coapAddresses = _getCoapAddresses(config);
         }
 
-        if (config.msgOrContext === "context") {
+        if ((msgOrContext === "context") | (msgOrContext === "both")) {
             let contextVar = _getContextVar();
             if (!contextVar.get(contextVarKey)) {
                 contextVar.set(contextVarKey, {});
@@ -33,12 +34,12 @@ module.exports = function(RED) {
         });
 
         function _processThingDescription(thingDescription) {
-            // TODO: Allow both for sending as message and storing in context
-            if (config.msgOrContext === "msg") {
+            if ((msgOrContext === "msg") | (msgOrContext === "both")) {
                 let message = {};
                 message[tdMsgProperty] = thingDescription;
                 node.send(message);
-            } else if (config.msgOrContext === "context") { 
+            }
+            if ((msgOrContext === "context") | (msgOrContext === "both")) {
                 let contextVar;
                 if (contextVarType === "flow") {
                     contextVar = node.context().flow;

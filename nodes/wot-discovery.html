@@ -50,6 +50,9 @@
                 } else if (val == "context") {
                     $(".node-input-msgProperty-row").hide();
                     $(".node-input-contextVar-row").show();
+                } else if (val == "both") {
+                    $(".node-input-msgProperty-row").show();
+                    $(".node-input-contextVar-row").show();
                 }
             });
 
@@ -105,6 +108,7 @@
         <select id="node-input-msgOrContext">
             <option value="msg">Message</option>
             <option value="context">Context</option>
+            <option value="both">Both</option>
         </select>
     </div>
 
