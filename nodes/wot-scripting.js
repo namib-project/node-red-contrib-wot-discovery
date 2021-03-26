@@ -62,10 +62,10 @@ module.exports = function(RED) {
             let filterMode = config.filterMode;
 
             if (filterMode === "both") {
-                if (!foundAffordances.includes(affordanceName)) {
-                    return;
-                } else {
+                if (foundAffordances.includes(affordanceName)) {
                     foundAffordances = [affordanceName];
+                } else {
+                    return;
                 }
             } else if (filterMode === "affordanceName") {
                 if (affordanceNames.includes(affordanceName)) {
