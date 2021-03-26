@@ -68,7 +68,11 @@ module.exports = function(RED) {
                     foundAffordances = [affordanceName];
                 }
             } else if (filterMode === "affordanceName") {
-                foundAffordances = [affordanceName];
+                if (affordanceNames.includes(affordanceName)) {
+                    foundAffordances = [affordanceName];
+                } else {
+                    return;
+                }
             } else if (filterMode !== "@type") {
                node.error(`Illegal filter mode "${filtermode}" defined!`);
                return;
