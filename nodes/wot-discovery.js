@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
     var coap = require("coap");
     var url = require("uri-js");
 
@@ -27,9 +27,9 @@ module.exports = function(RED) {
             }
         }
 
-        node.on('input', function(msg) {
+        node.on("input", function (msg) {
             if (coapAddresses) {
-                coapAddresses.forEach(address => {
+                coapAddresses.forEach((address) => {
                     _sendCoapDiscovery(address);
                 });
             }
@@ -75,12 +75,13 @@ module.exports = function(RED) {
         }
 
         function _onResponse(res) {
-            res.on("data", data => {
+            res.on("data", (data) => {
                 if (res.headers["Content-Format"] === "application/json") {
                     try {
                         var thingDescription = JSON.parse(data.toString());
-                        _processThingDescription(thingDescription)
+                        _processThingDescription(thingDescription);
                     } catch (error) {
+                        console.log(data.toString());
                         node.error(error.message);
                     }
                 }
@@ -93,7 +94,9 @@ module.exports = function(RED) {
         }
 
         function _sendCoapDiscovery(address) {
-            var reqOpts = url.parse(`coap://${address}/.well-known/wot-thing-description`);
+            var reqOpts = url.parse(
+                `coap://${address}/.well-known/wot-thing-description`
+            );
             reqOpts.pathname = reqOpts.path;
             reqOpts.method = "GET";
             reqOpts.multicast = true;
@@ -129,4 +132,4 @@ module.exports = function(RED) {
         }
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
-}
+};
