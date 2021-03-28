@@ -11,6 +11,7 @@ module.exports = function (RED) {
         var contextVarType = config.contextVarType;
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
+        var deleteExistingTDs = config.deleteExistingTDs || true;
 
         var timeouts = {};
 
@@ -28,6 +29,10 @@ module.exports = function (RED) {
         }
 
         node.on("input", function (msg) {
+            if (deleteExistingTDs && msgOrContext === "context") {
+                _resetContextVar();
+            }
+
             if (coapAddresses) {
                 coapAddresses.forEach((address) => {
                     _sendCoapDiscovery(address);
@@ -72,6 +77,13 @@ module.exports = function (RED) {
                 return node.context().global;
             }
             return null;
+        }
+
+        function _resetContextVar() {
+            let contextVar = _getContextVar();
+            if (!contextVar.get(contextVarKey)) {
+                contextVar.set(contextVarKey, {});
+            }
         }
 
         function _onResponse(res) {

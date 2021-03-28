@@ -47,12 +47,15 @@
                 if (val == "msg") {
                     $(".node-input-msgProperty-row").show();
                     $(".node-input-contextVar-row").hide();
+                    $(".node-input-deleteExistingTDs-row").hide();
                 } else if (val == "context") {
                     $(".node-input-msgProperty-row").hide();
                     $(".node-input-contextVar-row").show();
+                    $(".node-input-deleteExistingTDs-row").show();
                 } else if (val == "both") {
                     $(".node-input-msgProperty-row").show();
                     $(".node-input-contextVar-row").show();
+                    $(".node-input-deleteExistingTDs-row").show();
                 }
             });
 
@@ -153,7 +156,7 @@
         </div>
     </div>
 
-    <div class="form-row">
+    <div class="form-row node-input-deleteExistingTDs-row hide">
         <input
             type="checkbox"
             id="node-input-deleteExistingTDs"
