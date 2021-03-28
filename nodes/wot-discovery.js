@@ -15,7 +15,7 @@ module.exports = function (RED) {
 
         var timeouts = {};
 
-        // Add Implementations for MQTT and HTTP
+        // TODO: Add Implementations for MQTT and HTTP
 
         if (config.useCoap) {
             coapAddresses = _getCoapAddresses(config);
