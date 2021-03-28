@@ -21,7 +21,7 @@ module.exports = function (RED) {
             coapAddresses = _getCoapAddresses(config);
         }
 
-        if ((msgOrContext === "context") | (msgOrContext === "both")) {
+        if ((msgOrContext === "context") || (msgOrContext === "both")) {
             let contextVar = _getContextVar();
             if (!contextVar.get(contextVarKey)) {
                 contextVar.set(contextVarKey, {});
@@ -41,12 +41,12 @@ module.exports = function (RED) {
         });
 
         function _processThingDescription(thingDescription) {
-            if ((msgOrContext === "msg") | (msgOrContext === "both")) {
+            if ((msgOrContext === "msg") || (msgOrContext === "both")) {
                 let message = {};
                 message[tdMsgProperty] = thingDescription;
                 node.send(message);
             }
-            if ((msgOrContext === "context") | (msgOrContext === "both")) {
+            if ((msgOrContext === "context") || (msgOrContext === "both")) {
                 let contextVar;
                 if (contextVarType === "flow") {
                     contextVar = node.context().flow;
