@@ -93,6 +93,7 @@ module.exports = function (RED) {
 
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue) {
 
+            let thingDescription = thing.getThingDescription();
             switch (operationType) {
                 case "readProperty":
                     thing.readProperty(affordanceName).then(property => {
@@ -118,7 +119,11 @@ module.exports = function (RED) {
                     break;
                 case "invokeAction":
                     let invokedAction;
-                    if (inputValue) {
+                    let constValue = thingDescription.actions?.[affordanceName]?.input?.const;
+                    if (constValue) {
+                        invokedAction = thing.invokeAction(affordanceName, constValue);
+                    }
+                    else if (inputValue) {
                         invokedAction = thing.invokeAction(affordanceName, inputValue);
                     } else {
                         invokedAction = thing.invokeAction(affordanceName);
