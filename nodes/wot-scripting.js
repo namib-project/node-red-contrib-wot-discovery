@@ -7,11 +7,7 @@ module.exports = function (RED) {
 
     const propertyOperations = ["readProperty", "writeProperty", "observeProperty",]
 
-    const servient = new Servient();
-    servient.addClientFactory(new HttpClientFactory(null));
-    servient.addClientFactory(new CoapClientFactory(null));
-    servient.addClientFactory(new MqttClientFactory(null));
-    const WoTHelpers = new Helpers(servient);
+    var thingCache = {};
 
     function WoTScriptingNode(config) {
         RED.nodes.createNode(this, config);
@@ -23,6 +19,7 @@ module.exports = function (RED) {
             var affordanceName = config.affordanceName || msg.affordanceName;
             var type = config.affordanceType || msg.affordanceType;
             var inputValue = msg.payload || config.inputValue;
+            var cacheMinutes = config.cacheMinutes || 15;
 
             var affordanceType = propertyOperations.includes(operationType) ? "properties" : operationType == "invokeAction" ? "actions" : operationType == "subscribeEvent" ? "events" : null;
 
@@ -77,19 +74,45 @@ module.exports = function (RED) {
                 return;
             }
 
-            try {
-                servient.start().then(async (WoT) => {
-                    let thing = await WoT.consume(thingDescription);
+            let identifier = _getTDIdentifier(thingDescription);
 
-                    foundAffordances.forEach(affordance => {
-                        performOperationOnThing(thing, operationType, affordance, msg, inputValue);
-                    });
-                });
-            }
-            catch (err) {
-                node.error("Script error:", err);
+            try {
+                if (thingCache[identifier]) {
+                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue);
+                    if (cacheMinutes) {
+                        thingCache[identifier].timer.refresh();
+                    }
+                } else {
+                    _getConsumedThing(thingDescription).then(
+                        (consumedThing) => {
+                            thingCache[identifier].td = consumedThing;
+                            performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue);
+                            if (cacheMinutes) {
+                                thingCache[identifier].timer = setTimeout(() => {
+                                    thingCache[identifier].servient.shutdown();
+                                    delete thingCache[identifier];
+                                }, cacheMinutes * 60 * 1000);
+                            }
+                        }
+                    );
+                }
+            } catch (error) {
+                console.log(error);
+                node.error("Error:", error.message);
             }
         });
+
+        function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue) {
+            foundAffordances.forEach((affordance) => {
+                performOperationOnThing(
+                    consumedThing,
+                    operationType,
+                    affordance,
+                    msg,
+                    inputValue
+                );
+            });
+        }
 
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue) {
 
@@ -145,6 +168,29 @@ module.exports = function (RED) {
             }
         }
 
+        function _getTDIdentifier(thingDescription) {
+            let identifier =
+                thingDescription.id ||
+                thingDescription.base ||
+                thingDescription.title;
+            return identifier;
+        }
+
+        async function _getConsumedThing(thingDescription) {
+            return new Promise((resolve, reject) => {
+                let servient = new Servient();
+                servient.addClientFactory(new HttpClientFactory(null));
+                servient.addClientFactory(new CoapClientFactory(null));
+                servient.addClientFactory(new MqttClientFactory(null));
+
+                servient.start().then((thingFactory) => {
+                    let consumedThing = thingFactory.consume(thingDescription);
+                    resolve(consumedThing);
+                    let identifier = _getTDIdentifier(thingDescription);
+                    thingCache[identifier] = {servient: servient};
+                });
+            });
+        }
     }
     RED.nodes.registerType("wot-scripting", WoTScriptingNode);
 }

@@ -20,6 +20,7 @@
             affordanceType: {value: ""},
             inputValue: {value: ""},
             filterMode: {value:"affordanceName"},
+            cacheMinutes: { value: 15 },
         },
         inputs:1,
         outputs:1,
@@ -102,6 +103,20 @@
         <label for="node-input-inputValue"><i class="fa fa-tag"></i> Input value</label>
         <input type="text" id="node-input-inputValue">
         <input type="hidden" id="node-input-inputValue-type">
+    </div>
+
+    <!-- TODO: Improve form for cache timer -->
+
+    <div class="row">
+        <label for="node-input-cacheMinutes" style="width: 100px; display: inline-block">
+            <i class="fa fa-tag"></i> Minutes to cache TDs:
+        </label>
+        <input
+            style="display: inline-block; width: 100px; margin-top: -20px;"
+            type="number"
+            id="node-input-cacheMinutes"
+            placeholder="15"
+        />
     </div>
 
 </script>
