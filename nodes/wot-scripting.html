@@ -2,6 +2,7 @@
 
     const allowedOperations = ["readProperty", "writeProperty", "observeProperty", "invokeAction", "subscribeEvent"]
     const operationsWithInput = ["writeProperty", "invokeAction",]
+    const operationsWithOutput = ["readProperty", "observeProperty", "invokeAction", "subscribeEvent"]
 
     RED.nodes.registerType('wot-scripting',{
         category: 'Web of Things',
@@ -21,6 +22,8 @@
             inputValue: {value: ""},
             filterMode: {value:"affordanceName"},
             cacheMinutes: { value: 15 },
+            outputVar: { value: "" },
+            outputVarType: { value: "msg" },
         },
         inputs:1,
         outputs:1,
@@ -56,6 +59,17 @@
                 } else {
                     $(".node-input-inputValue-row").hide();
                 }
+                if (operationsWithOutput.includes(val)) {
+                    $(".node-input-outputVar-row").show();
+                } else {
+                    $(".node-input-outputVar-row").hide();
+                }
+            });
+
+            $("#node-input-outputVar").typedInput({
+                type: "msg",
+                types: ["msg", "flow", "global"],
+                typeField: "#node-input-outputVarType",
             });
         }
     });
@@ -95,6 +109,12 @@
     <div class="form-row node-input-affordanceType-row hide">
         <label for="node-input-affordanceType"><i class="fa fa-tag"></i> @type</label>
         <input type="text" id="node-input-affordanceType">
+    </div>
+
+    <div class="form-row node-input-outputVar-row hide">
+        <label for="node-input-outputVar"><i class="fa fa-tag"></i> Save output to</label>
+        <input type="text" id="node-input-outputVar" placeholder="payload"/>
+        <input type="hidden" id="node-input-outputVarType" />
     </div>
 
     <!-- TODO: Improve usage of input values -->

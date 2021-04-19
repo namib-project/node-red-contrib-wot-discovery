@@ -25,6 +25,8 @@ module.exports = function (RED) {
             var affordanceName = config.affordanceName || msg.affordanceName;
             var type = config.affordanceType || msg.affordanceType;
             var inputValue = msg.payload || config.inputValue;
+            var outputVar = msg.outputVar || config.outputVar || "payload";
+            var outputVarType = msg.outputVarType || config.outputVarType || "msg";
             var cacheMinutes = config.cacheMinutes || 15;
 
             var affordanceType = operationsToAffordanceType[operationType];
@@ -84,7 +86,7 @@ module.exports = function (RED) {
 
             try {
                 if (thingCache[identifier]) {
-                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue);
+                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType);
                     if (cacheMinutes) {
                         thingCache[identifier].timer.refresh();
                     }
@@ -92,7 +94,7 @@ module.exports = function (RED) {
                     _getConsumedThing(thingDescription).then(
                         (consumedThing) => {
                             thingCache[identifier].td = consumedThing;
-                            performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue);
+                            performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType);
                             if (cacheMinutes) {
                                 thingCache[identifier].timer = setTimeout(() => {
                                     thingCache[identifier].servient.shutdown();
@@ -108,26 +110,28 @@ module.exports = function (RED) {
             }
         });
 
-        function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue) {
+        function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType) {
             foundAffordances.forEach((affordance) => {
                 performOperationOnThing(
                     consumedThing,
                     operationType,
                     affordance,
                     msg,
-                    inputValue
+                    inputValue,
+                    outputVar,
+                    outputVarType,
                 );
             });
         }
 
-        function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue) {
+        // TODO: This signature has to be shortened
+        function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType) {
 
             let thingDescription = thing.getThingDescription();
             switch (operationType) {
                 case "readProperty":
-                    thing.readProperty(affordanceName).then(property => {
-                        msg.payload = property;
-                        node.send(msg);
+                    thing.readProperty(affordanceName).then(output => {
+                        _handleOutput(msg, output, outputVar, outputVarType);
                     }).catch(error => node.error(error));
                     break;
                 case "writeProperty":
@@ -135,15 +139,13 @@ module.exports = function (RED) {
                         node.error("No input value given!");
                         return;
                     }
-                    thing.writeProperty(affordanceName, inputValue).then(property => {
-                        msg.payload = property;
-                        node.send(msg);
+                    thing.writeProperty(affordanceName, inputValue).then(output => {
+                        _handleOutput(msg, output, outputVar, outputVarType);
                     }).catch(error => node.error(error));
                     break;
                 case "observeProperty":
-                    thing.observeProperty(affordanceName).then(property => {
-                        msg.payload = property;
-                        node.send(msg);
+                    thing.observeProperty(affordanceName).then(output => {
+                        _handleOutput(msg, output, outputVar, outputVarType);
                     }).catch(error => node.error(error));
                     break;
                 case "invokeAction":
@@ -157,21 +159,36 @@ module.exports = function (RED) {
                     } else {
                         invokedAction = thing.invokeAction(affordanceName);
                     }
-                    invokedAction.then(property => {
-                        msg.payload = property;
-                        node.send(msg);
+                    invokedAction.then(output => {
+                        _handleOutput(msg, output, outputVar, outputVarType);
                     }).catch(error => node.error(error));
                     break;
                 case "subscribeEvent":
-                    thing.subscribeEvent(affordanceName).then(property => {
-                        msg.payload = property;
-                        node.send(msg);
+                    thing.subscribeEvent(affordanceName).then(output => {
+                        _handleOutput(msg, output, outputVar, outputVarType);
                     }).catch(error => node.error(error));
                     break;
 
                 default:
                     break;
             }
+        }
+
+        function _handleOutput(msg, output, outputVar, outputVarType) {
+            if (output) {
+                if (outputVarType === "msg") {
+                    msg[outputVar] = output;
+                } else if (outputVarType === "flow") {
+                    node.context().flow.set(outputVar, output);
+                    console.log(`Putting ${output} into ${outputVar} of ${outputVarType}`);
+                } else if (outputVarType === "global") {
+                    node.context().global.set(outputVar, output);
+                    console.log(`Putting ${output} into ${outputVar} of ${outputVarType}`);
+                } else {
+                    throw Error("Invalid output context given! Possible values are msg, flow or global!");
+                }
+            }
+            node.send(msg);
         }
 
         function _getTDIdentifier(thingDescription) {
