@@ -5,7 +5,13 @@ module.exports = function (RED) {
     const { CoapClientFactory } = require('@node-wot/binding-coap');
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
 
-    const propertyOperations = ["readProperty", "writeProperty", "observeProperty",]
+    const operationsToAffordanceType = {
+        readProperty: "properties",
+        writeProperty: "properties",
+        observeProperty: "properties",
+        invokeAction: "actions",
+        subscribeEvent: "events",
+    }
 
     var thingCache = {};
 
@@ -21,7 +27,7 @@ module.exports = function (RED) {
             var inputValue = msg.payload || config.inputValue;
             var cacheMinutes = config.cacheMinutes || 15;
 
-            var affordanceType = propertyOperations.includes(operationType) ? "properties" : operationType == "invokeAction" ? "actions" : operationType == "subscribeEvent" ? "events" : null;
+            var affordanceType = operationsToAffordanceType[operationType];
 
             if (!affordanceType) {
                 node.error("Illegal operation type defined!");
