@@ -91,6 +91,7 @@ module.exports = function (RED) {
                         if (thingCache[identifier].timer) {
                             clearTimeout(thingCache[identifier].timer);
                         }
+                        thingCache[identifier].timer = setTimeout(() => {
                             thingCache[identifier].servient.shutdown();
                             delete thingCache[identifier];
                         }, cacheMinutes * 60 * 1000);
