@@ -88,12 +88,7 @@ module.exports = function (RED) {
                 if (thingCache[identifier]) {
                     performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType);
                     if (cacheMinutes) {
-                        if (thingCache[identifier].timer) {
-                            clearTimeout(thingCache[identifier].timer);
-                        }
-                            thingCache[identifier].servient.shutdown();
-                            delete thingCache[identifier];
-                        }, cacheMinutes * 60 * 1000);
+                        thingCache[identifier].timer.refresh();
                     }
                 } else {
                     _getConsumedThing(thingDescription).then(
