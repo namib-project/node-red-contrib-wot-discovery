@@ -1,0 +1,25 @@
+var functionNode = require("@node-red/nodes/core/function/10-function.js");
+var helper = require("node-red-node-test-helper");
+
+describe("WoTScriptingNode", function () {
+    beforeEach(function (done) {
+        helper.startServer(done);
+    });
+
+    afterEach(function (done) {
+        helper.unload().then(function () {
+            helper.stopServer(done);
+        });
+    });
+
+    it("should be loaded", function (done) {
+        var flow = [];
+
+        //need to register nodes in order to use them
+        var testNodes = [];
+        helper.load(testNodes, flow, function () {
+            done();
+        });
+    });
+
+});

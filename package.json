@@ -10,7 +10,25 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "nyc mocha --exit",
+    "coverage": "nyc report --reporter=lcov --reporter=text-summary",
+    "jshint": "jshint coap"
+  },
+  "mocha": {
+    "globals": [
+      "expect"
+    ],
+    "ignoreLeaks": false,
+    "ui": "bdd",
+    "reporter": "spec"
+  },
+  "jshintConfig": {
+    "curly": true,
+    "forin": true,
+    "immed": true,
+    "nonbsp": true,
+    "strict": true,
+    "loopfunc": true
   },
   "repository": {
     "type": "git",
@@ -34,5 +52,13 @@
     "@node-wot/binding-mqtt": "^0.7.5",
     "@node-wot/core": "^0.7.5",
     "coap": "github:mcollina/node-coap"
+  },
+  "devDependencies": {
+    "coveralls": "^3.1.0",
+    "jshint": "^2.12.0",
+    "mocha": "^8.2.1",
+    "node-red": "^1.2.7",
+    "node-red-node-test-helper": "^0.2.5",
+    "nyc": "^15.1.0"
   }
 }
