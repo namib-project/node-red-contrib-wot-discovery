@@ -2,8 +2,6 @@ module.exports = function (RED) {
     "use strict";
     var coap = require("coap");
     var url = require("uri-js");
-    var mdns = require("multicast-dns");
-    var mqtt = require('mqtt');
 
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
