@@ -12,7 +12,7 @@
   "scripts": {
     "test": "nyc mocha --exit",
     "coverage": "nyc report --reporter=lcov --reporter=text-summary",
-    "jshint": "jshint coap"
+    "jshint": "jshint nodes"
   },
   "mocha": {
     "globals": [
