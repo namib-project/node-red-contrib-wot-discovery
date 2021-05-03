@@ -9,6 +9,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         var node = this;
         var coapAddresses;
+        var client;
 
         var contextVarKey = config.contextVar || "thingDescriptions";
         var contextVarType = config.contextVarType;
@@ -41,7 +42,38 @@ module.exports = function (RED) {
                     _sendCoapDiscovery(address);
                 });
             }
+            _performMdnsDiscovery();
         });
+
+        function _performMdnsDiscovery() {
+            tcpDiscovery = mdns();
+            udpDiscovery = mdns();
+            // blah.on('response', function(response) {
+            //     console.log('got a response packet:', response)
+            //   })
+
+            //   blah.on('query', function(query) {
+            //     console.log('got a query packet:', query)
+            //   })
+
+            tcpDiscovery.query({
+                questions: [
+                    {
+                        name: "_wot._tcp.local",
+                        type: "PTR",
+                    },
+                ],
+            });
+
+            udpDiscovery.query({
+                questions: [
+                    {
+                        name: "_wot._udp.local",
+                        type: "PTR",
+                    },
+                ],
+            });
+        }
 
         function _processThingDescription(thingDescription) {
             if (msgOrContext === "msg" || msgOrContext === "both") {
