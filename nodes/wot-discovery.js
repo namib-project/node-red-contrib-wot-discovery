@@ -43,6 +43,16 @@ module.exports = function (RED) {
             }
         });
 
+        function _processThingDescriptionJSON(thingDescriptionJSON) {
+            try {
+                var thingDescription = JSON.parse(thingDescriptionJSON.toString());
+                _processThingDescription(thingDescription);
+            } catch (error) {
+                console.log(thingDescriptionJSON.toString());
+                node.error(error.message);
+            }
+        }
+
         function _processThingDescription(thingDescription) {
             if (msgOrContext === "msg" || msgOrContext === "both") {
                 let message = {};
@@ -92,13 +102,7 @@ module.exports = function (RED) {
         function _onResponse(res) {
             res.on("data", (data) => {
                 if (res.headers["Content-Format"] === "application/json") {
-                    try {
-                        var thingDescription = JSON.parse(data.toString());
-                        _processThingDescription(thingDescription);
-                    } catch (error) {
-                        console.log(data.toString());
-                        node.error(error.message);
-                    }
+                    _processThingDescriptionJSON(data);
                 }
             });
         }
