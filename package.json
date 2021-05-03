@@ -28,7 +28,8 @@
     "immed": true,
     "nonbsp": true,
     "strict": true,
-    "loopfunc": true
+    "loopfunc": true,
+    "esversion": 6
   },
   "repository": {
     "type": "git",
