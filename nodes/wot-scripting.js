@@ -11,7 +11,7 @@ module.exports = function (RED) {
         observeProperty: "properties",
         invokeAction: "actions",
         subscribeEvent: "events",
-    }
+    };
 
     var thingCache = {};
 
@@ -38,7 +38,7 @@ module.exports = function (RED) {
 
             var thingDescription = msg.thingDescription;
 
-            var foundAffordances = []
+            var foundAffordances = [];
 
             var affordances = thingDescription[affordanceType];
 
@@ -46,7 +46,7 @@ module.exports = function (RED) {
 
             if (config.filterMode !== "affordanceName") {
                 affordanceNames.forEach((name, index) => {
-                    let affordanceTypes = []
+                    let affordanceTypes = [];
                     let affordance = affordances[name];
                     let types = affordance["@type"];
                     // TODO: Refactor string to array conversion
@@ -119,7 +119,7 @@ module.exports = function (RED) {
                     msg,
                     inputValue,
                     outputVar,
-                    outputVarType,
+                    outputVarType
                 );
             });
         }
@@ -150,7 +150,7 @@ module.exports = function (RED) {
                     break;
                 case "invokeAction":
                     let invokedAction;
-                    let constValue = thingDescription.actions?.[affordanceName]?.input?.const;
+                    let constValue = _getConstValueInput(thingDescription, affordanceName); 
                     if (constValue) {
                         invokedAction = thing.invokeAction(affordanceName, constValue);
                     }
@@ -171,6 +171,15 @@ module.exports = function (RED) {
 
                 default:
                     break;
+            }
+        }
+
+        function _getConstValueInput(thingDescription, affordanceName) {
+            try {
+                let affordance = thingDescription.actions[affordanceName];
+                return affordance.input.const;
+            } catch (error) {
+                return null;
             }
         }
 
@@ -199,7 +208,7 @@ module.exports = function (RED) {
             return identifier;
         }
 
-        async function _getConsumedThing(thingDescription) {
+        function _getConsumedThing(thingDescription) {
             return new Promise((resolve, reject) => {
                 let servient = new Servient();
                 servient.addClientFactory(new HttpClientFactory(null));
@@ -216,4 +225,4 @@ module.exports = function (RED) {
         }
     }
     RED.nodes.registerType("wot-scripting", WoTScriptingNode);
-}
+};

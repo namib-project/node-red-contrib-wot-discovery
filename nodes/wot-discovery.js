@@ -1,6 +1,9 @@
 module.exports = function (RED) {
+    "use strict";
     var coap = require("coap");
     var url = require("uri-js");
+    var mdns = require("multicast-dns");
+    var mqtt = require('mqtt');
 
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
@@ -102,7 +105,7 @@ module.exports = function (RED) {
 
         function _getTDIdentifier(thingDescription) {
             let identifier = thingDescription.id || thingDescription.base || thingDescription.title;
-            return identifier
+            return identifier;
         }
 
         function _sendCoapDiscovery(address) {
