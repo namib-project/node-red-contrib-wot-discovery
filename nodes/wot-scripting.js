@@ -302,17 +302,19 @@ module.exports = function (RED) {
          * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
          */
         function _handleOutput(msg, output, outputVar, outputVarType, outputPayload) {
-            if (typeof output !== "undefined") {
-                if (outputVarType === "msg") {
-                    msg[outputVar] = output;
-                } else if (outputVarType === "flow") {
-                    node.context().flow.set(outputVar, output);
-                    console.log(`Putting ${output} into ${outputVar} of ${outputVarType}`);
-                } else if (outputVarType === "global") {
-                    node.context().global.set(outputVar, output);
-                    console.log(`Putting ${output} into ${outputVar} of ${outputVarType}`);
-                } else {
-                    throw Error("Invalid output context given! Possible values are msg, flow or global!");
+            if (output != null) {
+                switch (outputVarType) {
+                    case "msg":
+                        msg[outputVar] = output;
+                        break;
+                    case "flow":
+                        node.context().flow.set(outputVar, output);
+                        break;
+                    case "global":
+                        node.context().global.set(outputVar, output);
+                        break;
+                    default:
+                        throw Error("Invalid output context given! Possible values are msg, flow or global!");
                 }
                 if (outputPayload) {
                   msg.payload = output;
