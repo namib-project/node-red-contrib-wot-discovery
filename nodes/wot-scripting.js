@@ -184,7 +184,7 @@ module.exports = function (RED) {
         }
 
         function _handleOutput(msg, output, outputVar, outputVarType) {
-            if (output) {
+            if (typeof output !== "undefined") {
                 if (outputVarType === "msg") {
                     msg[outputVar] = output;
                 } else if (outputVarType === "flow") {
