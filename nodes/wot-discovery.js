@@ -13,6 +13,7 @@ module.exports = function (RED) {
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
         var deleteExistingTDs = config.deleteExistingTDs || true;
+        var wellKnownURI = config.wellKnownURI || "wot-thing-description";
 
         var timeouts = {};
 
@@ -111,8 +112,9 @@ module.exports = function (RED) {
         }
 
         function _sendCoapDiscovery(address) {
+            node.log(wellKnownURI);
             var reqOpts = url.parse(
-                `coap://${address}/.well-known/wot-thing-description`
+                `coap://${address}/.well-known/${wellKnownURI}`
             );
             reqOpts.pathname = reqOpts.path;
             reqOpts.method = "GET";

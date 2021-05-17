@@ -22,6 +22,7 @@
             contextVar: { value: "" },
             contextVarType: { value: "flow" },
             deleteExistingTDs: { value: true },
+            wellKnownURI: {value: "wot-thing-description"},
         },
         inputs: 1,
         outputs: 1,
@@ -167,6 +168,13 @@
         </label>
     </div>
 
+    <div class="form-row">
+        <label style="width: auto;" for="node-input-wellKnownURI">
+            <i class="fa fa-tag"></i> Well-known URI</label
+        >
+        <input type="text" id="node-input-wellKnownURI" placeholder="wot-thing-description">
+    </div>
+    
     <div class="form-row">
         <input
             type="checkbox"
