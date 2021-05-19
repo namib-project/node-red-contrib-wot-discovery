@@ -13,7 +13,6 @@ module.exports = function (RED) {
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
         var deleteExistingTDs = config.deleteExistingTDs || true;
-        var coreLinks = [];
         var coreURI = config.coreURI;
         var tdURI = config.tdURI;
 
@@ -23,6 +22,11 @@ module.exports = function (RED) {
 
         if (config.useCoap) {
             coapAddresses = _getCoapAddresses(config);
+        }
+
+        if(coreURI){
+            if(config.useCoap){
+            }
         }
 
         if (msgOrContext === "context" || msgOrContext === "both") {
@@ -42,8 +46,7 @@ module.exports = function (RED) {
                     if(tdURI)
                         _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
                     if(coreURI){
-                        _getDiscoveryLinks(coapAddresses);
-                        coreLinks.forEach((link) => _sendCoapDiscovery(address, link));
+                        _getDiscoveryLinks();
                     }
                 });
             }
@@ -155,19 +158,13 @@ module.exports = function (RED) {
 
             return addresses;
         }
-        function _getDiscoveryLinks(addresses){
+        function _getDiscoveryLinks(){
             if(config.useCoap){
-                addresses.forEach((address)=> {
+                coapAddresses.forEach((address)=>{
                     var reqOpt = url.parse(`coap://${address}/.well-known/core`);
                     reqOpt.pathname = reqOpt.path;
                     reqOpt.query =`rt=wot.thing`;
-                    /*var req = coap.request({
-                        hostname: `${address}`,
-                        pathname: "/.well-known/core",
-                        multicast: true,
-                        method: 'get',
-                        query: `rt=wot.thing`
-                    })*/
+                    reqOpt.multicast = true;
                     var req = coap.request(reqOpt);
                     req.on("response", _coreResponse);
                     req.on("error", function (err) {
@@ -187,7 +184,9 @@ module.exports = function (RED) {
                         links[i]=links[i].replace('<', '');
                         links[i]=links[i].replace('>', '');
                         node.log(links[i]);
-                        coreLinks.push(links[i]);
+                        coapAddresses.forEach((address)=>{
+                            _sendCoapDiscovery(address, links[i]);
+                        });
                     }
                 }
             });
