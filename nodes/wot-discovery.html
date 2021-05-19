@@ -23,6 +23,8 @@
             contextVarType: { value: "flow" },
             deleteExistingTDs: { value: true },
             wellKnownURI: {value: "wot-thing-description"},
+            coreURI: {value: false},
+            tdURI: {value: true},
         },
         inputs: 1,
         outputs: 1,
@@ -168,13 +170,30 @@
         </label>
     </div>
 
-    <div class="form-row">
-        <label style="width: auto;" for="node-input-wellKnownURI">
-            <i class="fa fa-tag"></i> Well-known URI</label
-        >
-        <input type="text" id="node-input-wellKnownURI" placeholder="wot-thing-description">
+    <div class="form-row" id="node-input-wellKnownURI-row">
+        <label for="node-input-wellKnownURI-row" style="width:auto"><i class="fa fa-tasks"></i> Well-known URI</label>
+        <div>
+            <input
+            type="checkbox"
+            id="node-input-tdURI"
+            style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-useCoap" style="width: auto">
+                Use wot-thing-description
+            </label>
+        </div>
+        <div>
+            <input
+            type="checkbox"
+            id="node-input-coreURI"
+            style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-coreURI" style="width: auto">
+                Use core
+            </label>
+        </div>
     </div>
-    
+    <br>    
     <div class="form-row">
         <input
             type="checkbox"

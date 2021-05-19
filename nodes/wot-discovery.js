@@ -14,6 +14,8 @@ module.exports = function (RED) {
         var msgOrContext = config.msgOrContext;
         var deleteExistingTDs = config.deleteExistingTDs || true;
         var wellKnownURI = config.wellKnownURI || "wot-thing-description";
+        var coreURI = config.coreURI;
+        var tdURI = config.tdURI;
 
         var timeouts = {};
 
