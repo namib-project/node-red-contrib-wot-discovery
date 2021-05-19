@@ -13,7 +13,7 @@ module.exports = function (RED) {
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
         var deleteExistingTDs = config.deleteExistingTDs || true;
-        var wellKnownURI = config.wellKnownURI || "wot-thing-description";
+        var coreLinks = [];
         var coreURI = config.coreURI;
         var tdURI = config.tdURI;
 
@@ -39,7 +39,12 @@ module.exports = function (RED) {
 
             if (coapAddresses) {
                 coapAddresses.forEach((address) => {
-                    _sendCoapDiscovery(address);
+                    if(tdURI)
+                        _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
+                    if(coreURI){
+                        _getDiscoveryLinks(coapAddresses);
+                        coreLinks.forEach((link) => _sendCoapDiscovery(address, link));
+                    }
                 });
             }
         });
@@ -113,9 +118,9 @@ module.exports = function (RED) {
             return identifier;
         }
 
-        function _sendCoapDiscovery(address) {
+        function _sendCoapDiscovery(address, knownURI) {
             var reqOpts = url.parse(
-                `coap://${address}/.well-known/${wellKnownURI}`
+                `coap://${address}${knownURI}`
             );
             reqOpts.pathname = reqOpts.path;
             reqOpts.method = "GET";
@@ -149,6 +154,43 @@ module.exports = function (RED) {
             }
 
             return addresses;
+        }
+        function _getDiscoveryLinks(addresses){
+            if(config.useCoap){
+                addresses.forEach((address)=> {
+                    var reqOpt = url.parse(`coap://${address}/.well-known/core`);
+                    reqOpt.pathname = reqOpt.path;
+                    reqOpt.query =`rt=wot.thing`;
+                    /*var req = coap.request({
+                        hostname: `${address}`,
+                        pathname: "/.well-known/core",
+                        multicast: true,
+                        method: 'get',
+                        query: `rt=wot.thing`
+                    })*/
+                    var req = coap.request(reqOpt);
+                    req.on("response", _coreResponse);
+                    req.on("error", function (err) {
+                        node.log("client error");
+                        node.log(err);
+                    });
+                    req.end();
+                });
+            }
+        }
+
+        function _coreResponse(res){
+            res.on("data", (data) => {
+                if(res.headers["Content-Format"]==="application/link-format"){
+                    var links=data.toString().match(/<.*?>/g);
+                    for(var i=0; i<links.length; i++){
+                        links[i]=links[i].replace('<', '');
+                        links[i]=links[i].replace('>', '');
+                        node.log(links[i]);
+                        coreLinks.push(links[i]);
+                    }
+                }
+            });
         }
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
