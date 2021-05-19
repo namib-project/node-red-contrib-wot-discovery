@@ -117,6 +117,7 @@ module.exports = function (RED) {
             reqOpts.pathname = reqOpts.path;
             reqOpts.method = "GET";
             reqOpts.multicast = true;
+            reqOpts.Block2 = Buffer.of(0x5); // TODO: Make block-size adjustable
             var req = coap.request(reqOpts);
             req.on("response", _onResponse);
             req.on("error", function (err) {
