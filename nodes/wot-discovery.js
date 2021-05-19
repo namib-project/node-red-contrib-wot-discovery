@@ -114,7 +114,6 @@ module.exports = function (RED) {
         }
 
         function _sendCoapDiscovery(address) {
-            node.log(wellKnownURI);
             var reqOpts = url.parse(
                 `coap://${address}/.well-known/${wellKnownURI}`
             );
