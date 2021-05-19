@@ -42,7 +42,7 @@
     "mqtt"
   ],
   "author": "Jan Romann",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/JKRhb/node-red-contrib-wot-discovery/issues"
   },
