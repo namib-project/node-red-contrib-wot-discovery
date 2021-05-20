@@ -199,7 +199,7 @@ module.exports = function (RED) {
 
                             curentValue = curentValue.split("=");
                             let parameter = curentValue[0];
-                            let values = curentValue[1]
+                            let values = curentValue[1];
 
                             switch (parameter) {
                                 case "ct":
@@ -213,7 +213,7 @@ module.exports = function (RED) {
                                     }
                                     break;
                             }
-                        })
+                        });
 
                         if (correctContentType && correctResourceType) {
                             _sendCoapDiscovery(`[${res.rsinfo.address}]`, path);
