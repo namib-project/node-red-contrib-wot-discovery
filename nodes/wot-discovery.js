@@ -155,13 +155,13 @@ module.exports = function (RED) {
             return addresses;
         }
         function _getDiscoveryLinks(){
-            if(config.useCoap){
-                coapAddresses.forEach((address)=>{
-                    var reqOpt = url.parse(`coap://${address}/.well-known/core`);
-                    reqOpt.pathname = reqOpt.path;
-                    reqOpt.query =`rt=wot.thing`;
-                    reqOpt.multicast = true;
-                    var req = coap.request(reqOpt);
+            if (config.useCoap) {
+                coapAddresses.forEach(address => {
+                    const reqOpts = url.parse(`coap://${address}/.well-known/core`);
+                    reqOpts.pathname = reqOpts.path;
+                    reqOpts.query ="rt=wot.thing";
+                    reqOpts.multicast = true;
+                    const req = coap.request(reqOpts);
                     req.on("response", _coreResponse);
                     req.on("error", function (err) {
                         node.log("client error");
