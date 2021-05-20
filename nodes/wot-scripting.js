@@ -26,6 +26,7 @@ module.exports = function (RED) {
             var type = config.affordanceType || msg.affordanceType;
             var inputValue = msg.payload || config.inputValue;
             var outputVar = msg.outputVar || config.outputVar || "payload";
+            var outputPayload = config.outputPayload;
             var outputVarType = msg.outputVarType || config.outputVarType || "msg";
             var cacheMinutes = config.cacheMinutes || 15;
 
@@ -86,7 +87,7 @@ module.exports = function (RED) {
 
             try {
                 if (thingCache[identifier]) {
-                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType);
+                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
                     if (cacheMinutes) {
                         thingCache[identifier].timer.refresh();
                     }
@@ -94,7 +95,7 @@ module.exports = function (RED) {
                     _getConsumedThing(thingDescription).then(
                         (consumedThing) => {
                             thingCache[identifier].td = consumedThing;
-                            performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType);
+                            performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
                             if (cacheMinutes) {
                                 thingCache[identifier].timer = setTimeout(() => {
                                     thingCache[identifier].servient.shutdown();
@@ -110,7 +111,7 @@ module.exports = function (RED) {
             }
         });
 
-        function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType) {
+        function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload) {
             foundAffordances.forEach((affordance) => {
                 performOperationOnThing(
                     consumedThing,
@@ -119,19 +120,20 @@ module.exports = function (RED) {
                     msg,
                     inputValue,
                     outputVar,
-                    outputVarType
+                    outputVarType,
+                    outputPayload
                 );
             });
         }
 
         // TODO: This signature has to be shortened
-        function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType) {
+        function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType, outputPayload) {
 
             let thingDescription = thing.getThingDescription();
             switch (operationType) {
                 case "readProperty":
                     thing.readProperty(affordanceName).then(output => {
-                        _handleOutput(msg, output, outputVar, outputVarType);
+                        _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
                 case "writeProperty":
@@ -140,17 +142,17 @@ module.exports = function (RED) {
                         return;
                     }
                     thing.writeProperty(affordanceName, inputValue).then(output => {
-                        _handleOutput(msg, output, outputVar, outputVarType);
+                        _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
                 case "observeProperty":
                     thing.observeProperty(affordanceName).then(output => {
-                        _handleOutput(msg, output, outputVar, outputVarType);
+                        _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
                 case "invokeAction":
                     let invokedAction;
-                    let constValue = _getConstValueInput(thingDescription, affordanceName); 
+                    let constValue = _getConstValueInput(thingDescription, affordanceName);
                     if (constValue) {
                         invokedAction = thing.invokeAction(affordanceName, constValue);
                     }
@@ -160,12 +162,12 @@ module.exports = function (RED) {
                         invokedAction = thing.invokeAction(affordanceName);
                     }
                     invokedAction.then(output => {
-                        _handleOutput(msg, output, outputVar, outputVarType);
+                        _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
                 case "subscribeEvent":
                     thing.subscribeEvent(affordanceName).then(output => {
-                        _handleOutput(msg, output, outputVar, outputVarType);
+                        _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
 
@@ -183,7 +185,7 @@ module.exports = function (RED) {
             }
         }
 
-        function _handleOutput(msg, output, outputVar, outputVarType) {
+        function _handleOutput(msg, output, outputVar, outputVarType, outputPayload) {
             if (typeof output !== "undefined") {
                 if (outputVarType === "msg") {
                     msg[outputVar] = output;
@@ -195,6 +197,9 @@ module.exports = function (RED) {
                     console.log(`Putting ${output} into ${outputVar} of ${outputVarType}`);
                 } else {
                     throw Error("Invalid output context given! Possible values are msg, flow or global!");
+                }
+                if (outputPayload) {
+                  msg["payload"] = output;
                 }
             }
             node.send(msg);
