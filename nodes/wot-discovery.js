@@ -38,10 +38,10 @@ module.exports = function (RED) {
 
             if (coapAddresses) {
                 coapAddresses.forEach((address) => {
-                    if(tdURI){
+                    if (tdURI) {
                         _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
                     }
-                    if(coreURI){
+                    if (coreURI) {
                         _getDiscoveryLinks();
                     }
                 });
