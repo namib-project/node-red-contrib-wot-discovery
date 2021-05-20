@@ -174,19 +174,52 @@ module.exports = function (RED) {
 
         function _coreResponse(res){
             res.on("data", (data) => {
-                if(res.headers["Content-Format"]==="application/link-format"){
-                    var links=data.toString().match(/<.*?>/g);
-                    for(var i=0; i<links.length; i++){
-                        links[i]=links[i].replace('<', '');
-                        links[i]=links[i].replace('>', '');
-                        node.log(links[i]);
-                        coapAddresses.forEach((address)=>{
-                            _sendCoapDiscovery(address, links[i]);
-                        });
-                    }
+                 if (res.headers["Content-Format"] === "application/link-format") {
+                    let links = data.toString().split(',');
+                    
+                    links = links.map(link => {
+                        return link.split(";");
+                    });
+                    
+                    links.forEach(link => {
+
+                        let correctResourceType = false;
+                        let correctContentType = false;
+                        let path;
+
+                        link.forEach(function (curentValue, index) {
+                            if (index === 0) {
+                                // First parameter must be the path
+                                // TODO: Add assertion for </ ... > format
+                                path = curentValue.substring(2, curentValue.length - 1);
+                                return;
+                            } else if (!path) {
+                                return;
+                            }
+
+                            curentValue = curentValue.split("=");
+                            let parameter = curentValue[0];
+                            let values = curentValue[1]
+
+                            switch (parameter) {
+                                case "ct":
+                                    if (values === "432") {
+                                        correctContentType = true;
+                                    }
+                                    break;
+                                case "rt":
+                                    if (values === '"wot.thing"') {
+                                        correctResourceType = true;
+                                    }
+                                    break;
+                            }
+                        })
+
+                        if (correctContentType && correctResourceType) {
+                            _sendCoapDiscovery(`[${res.rsinfo.address}]`, path);
+                        }
+                    });
                 }
-            });
-        }
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
 };
