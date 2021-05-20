@@ -117,7 +117,7 @@ module.exports = function (RED) {
             return identifier;
         }
 
-        function _sendCoapDiscovery(address, knownURI) {
+        function _sendCoapDiscovery(address, path) {
             var reqOpts = url.parse(
                 `coap://${address}${knownURI}`
             );
