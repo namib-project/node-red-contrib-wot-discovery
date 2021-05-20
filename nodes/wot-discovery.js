@@ -12,7 +12,7 @@ module.exports = function (RED) {
         var contextVarType = config.contextVarType;
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
-        var deleteExistingTDs = config.deleteExistingTDs || true;
+        var deleteExistingTDs = config.deleteExistingTDs != null ? config.deleteExistingTDs : true;
 
         var timeouts = {};
 
