@@ -30,7 +30,7 @@ module.exports = function (RED) {
         }
 
         node.on("input", function (msg) {
-            if (deleteExistingTDs && msgOrContext === "context") {
+            if (deleteExistingTDs && (msgOrContext === "context" || msgOrContext === "both")) {
                 _resetContextVar();
             }
 
