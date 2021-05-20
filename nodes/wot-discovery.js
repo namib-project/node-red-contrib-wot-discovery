@@ -188,9 +188,7 @@ module.exports = function (RED) {
                         let path;
 
                         link.forEach(function (curentValue, index) {
-                            if (index === 0) {
-                                // First parameter must be the path
-                                // TODO: Add assertion for </ ... > format
+                            if (index === 0 && (/^<.*>$/g).test(currentValue)&&currentValue.match(/<|>/g).length!==2) {//the first value starts with < ends with > and only contains exactly two characters of < or > characters
                                 path = curentValue.substring(2, curentValue.length - 1);
                                 return;
                             } else if (!path) {
