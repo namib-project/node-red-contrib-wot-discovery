@@ -12,7 +12,7 @@ module.exports = function (RED) {
         var contextVarType = config.contextVarType;
         var tdMsgProperty = config.msgProperty || "thingDescription";
         var msgOrContext = config.msgOrContext;
-        var deleteExistingTDs = config.deleteExistingTDs || true;
+        var deleteExistingTDs = config.deleteExistingTDs != null ? config.deleteExistingTDs : true;
         var coreURI = config.coreURI;
         var tdURI = config.tdURI;
 
@@ -32,7 +32,7 @@ module.exports = function (RED) {
         }
 
         node.on("input", function (msg) {
-            if (deleteExistingTDs && msgOrContext === "context") {
+            if (deleteExistingTDs && (msgOrContext === "context" || msgOrContext === "both")) {
                 _resetContextVar();
             }
 
@@ -124,6 +124,7 @@ module.exports = function (RED) {
             reqOpts.pathname = reqOpts.path;
             reqOpts.method = "GET";
             reqOpts.multicast = true;
+            reqOpts.Block2 = Buffer.of(0x5); // TODO: Make block-size adjustable
             var req = coap.request(reqOpts);
             req.on("response", _onResponse);
             req.on("error", function (err) {
