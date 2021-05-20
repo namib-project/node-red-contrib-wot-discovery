@@ -220,6 +220,8 @@ module.exports = function (RED) {
                         }
                     });
                 }
+            });
+        }
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
 };
