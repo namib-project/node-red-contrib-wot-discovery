@@ -199,7 +199,7 @@ module.exports = function (RED) {
                     throw Error("Invalid output context given! Possible values are msg, flow or global!");
                 }
                 if (outputPayload) {
-                  msg["payload"] = output;
+                  msg.payload = output;
                 }
             }
             node.send(msg);
