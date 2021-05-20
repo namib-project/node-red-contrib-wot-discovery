@@ -188,17 +188,18 @@ module.exports = function (RED) {
                         let correctContentType = false;
                         let path;
 
-                        link.forEach(function (curentValue, index) {
-                            if (index === 0 && (/^<\/.*>$/g).test(currentValue)&&currentValue.match(/<|>/g).length!==2) {//the first value starts with < ends with > and only contains exactly two characters of < or > characters
-                                path = curentValue.substring(2, curentValue.length - 1);
+                        link.forEach(function (currentValue, index) {
+                            if (index === 0 && (/^<\/.*>$/g).test(currentValue) && currentValue.match(/<|>/g).length === 2) {
+                                //the first value starts with < ends with > and only contains exactly two characters of < or > characters
+                                path = currentValue.substring(2, currentValue.length - 1);
                                 return;
                             } else if (!path) {
                                 return;
                             }
 
-                            curentValue = curentValue.split("=");
-                            let parameter = curentValue[0];
-                            let values = curentValue[1];
+                            currentValue = currentValue.split("=");
+                            let parameter = currentValue[0];
+                            let values = currentValue[1];
 
                             switch (parameter) {
                                 case "ct":
