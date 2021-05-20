@@ -74,7 +74,7 @@ describe("WoTScriptingNode", function () {
                 );
             }
 
-            const settings = {type: "udp6", reuseAddr: true, multicastAddress: "ff02::1", multicastInterface: "::%eth2"};
+            const settings = {type: "udp6", reuseAddr: true, multicastAddress: "ff02::1", multicastInterface: "::"};
             const server = new coap.createServer(settings);
 
             server.on('request', function(req, res) {
