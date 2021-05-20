@@ -24,11 +24,6 @@ module.exports = function (RED) {
             coapAddresses = _getCoapAddresses(config);
         }
 
-        if(coreURI){
-            if(config.useCoap){
-            }
-        }
-
         if (msgOrContext === "context" || msgOrContext === "both") {
             let contextVar = _getContextVar();
             if (!contextVar.get(contextVarKey)) {
