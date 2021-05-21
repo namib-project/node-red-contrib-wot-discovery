@@ -170,60 +170,60 @@ module.exports = function (RED) {
                 }
             }
 
-        function _coreResponse(res){
-            res.on("data", (data) => {
-                 if (res.headers["Content-Format"] === "application/link-format") {
-                    let links = data.toString().split(',');
-                    
-                    links = links.map(link => {
-                        return link.split(";");
-                    });
-                    
-                    links.forEach(link => {
+            function _coreResponse(res){
+                res.on("data", (data) => {
+                    if (res.headers["Content-Format"] === "application/link-format") {
+                        let links = data.toString().split(',');
+                        
+                        links = links.map(link => {
+                            return link.split(";");
+                        });
+                        
+                        links.forEach(link => {
 
-                        let correctResourceType = false;
-                        let correctContentType = false;
-                        let path;
+                            let correctResourceType = false;
+                            let correctContentType = false;
+                            let path;
 
-                        link.forEach(function (currentValue, index) {
-                            if (index === 0 && (/^<\/.*>$/g).test(currentValue) && currentValue.match(/<|>/g).length === 2) {
-                                //the first value starts with < ends with > and only contains exactly two characters of < or > characters
-                                path = currentValue.substring(2, currentValue.length - 1);
-                                return;
-                            } else if (!path) {
-                                return;
-                            }
+                            link.forEach(function (currentValue, index) {
+                                if (index === 0 && (/^<\/.*>$/g).test(currentValue) && currentValue.match(/<|>/g).length === 2) {
+                                    //the first value starts with < ends with > and only contains exactly two characters of < or > characters
+                                    path = currentValue.substring(2, currentValue.length - 1);
+                                    return;
+                                } else if (!path) {
+                                    return;
+                                }
 
-                            currentValue = currentValue.split("=");
-                            const parameter = currentValue[0];
-                            const values = currentValue[1];
+                                currentValue = currentValue.split("=");
+                                const parameter = currentValue[0];
+                                const values = currentValue[1];
 
-                            switch (parameter) {
-                                case "ct":
-                                    if (values === "432") {
-                                        correctContentType = true;
-                                    }
-                                    break;
-                                case "rt":
-                                    if (values === '"wot.thing"') {
-                                        correctResourceType = true;
-                                    }
-                                    break;
+                                switch (parameter) {
+                                    case "ct":
+                                        if (values === "432") {
+                                            correctContentType = true;
+                                        }
+                                        break;
+                                    case "rt":
+                                        if (values === '"wot.thing"') {
+                                            correctResourceType = true;
+                                        }
+                                        break;
+                                }
+                            });
+
+                            if (correctContentType && correctResourceType) {
+                                const uri = url.parse(path);
+                                if (uri.host) {
+                                    _sendCoapDiscovery(uri.host, uri.path);
+                                } else {
+                                    _sendCoapDiscovery(`[${res.rsinfo.address}]`, uri.path);
+                                }
                             }
                         });
-
-                        if (correctContentType && correctResourceType) {
-                            const uri = url.parse(path);
-                            if (uri.host) {
-                                _sendCoapDiscovery(uri.host, uri.path);
-                            } else {
-                                _sendCoapDiscovery(`[${res.rsinfo.address}]`, uri.path);
-                            }
-                        }
-                    });
-                }
-            });
-        }
+                    }
+                });
+            }
         });
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
