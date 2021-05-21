@@ -1,5 +1,4 @@
 const WoTDiscoveryNode = require("../nodes/wot-discovery.js");
-const injectNode = require("@node-red/nodes/core/common/20-inject.js");
 const helper = require("node-red-node-test-helper");
 const coap = require("coap");
 const url = require("uri-js");
@@ -35,14 +34,6 @@ describe("WoTScriptingNode", function () {
             const flow = [
                 {
                     id: "n1",
-                    type: "inject",
-                    wires: [["n2"]],
-                    once: true,
-                    payload: "",
-                    payloadType: "none",
-                },
-                {
-                    id: "n2",
                     type: "wot-discovery",
                     useCoap: true,
                     coreURI: true,
@@ -50,10 +41,10 @@ describe("WoTScriptingNode", function () {
                     coapUseIPv6: true,
                     coapIPv6Address: "all",
                     msgOrContext: "msg",
-                    wires: [["n3"]],
+                    wires: [["n2"]],
                 },
                 {
-                    id: "n3",
+                    id: "n2",
                     type: "end-test-node",
                     name: "end-test-node",
                 },
@@ -90,9 +81,11 @@ describe("WoTScriptingNode", function () {
                 }
               });
 
-            const testNodes = [injectNode, WoTDiscoveryNode, endTestNode];
+            const testNodes = [WoTDiscoveryNode, endTestNode];
             helper.load(testNodes, flow, function () {
+                const n1 = helper.getNode("n1");
                 server.listen(5683);
+                n1.emit("input", {payload:null});
             });
         });
 
