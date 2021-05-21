@@ -1,4 +1,3 @@
-var functionNode = require("@node-red/nodes/core/function/10-function.js");
 var WoTScriptingNode = require("../nodes/wot-scripting.js");
 var helper = require("node-red-node-test-helper");
 

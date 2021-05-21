@@ -1,6 +1,6 @@
 module.exports = function (RED) {
     "use strict";
-    const { Servient, Helpers } = require("@node-wot/core");
+    const { Servient } = require("@node-wot/core");
     const { HttpClientFactory } = require('@node-wot/binding-http');
     const { CoapClientFactory } = require('@node-wot/binding-coap');
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
@@ -46,7 +46,7 @@ module.exports = function (RED) {
             const affordanceNames = Object.keys(affordances);
 
             if (config.filterMode !== "affordanceName") {
-                affordanceNames.forEach((name, index) => {
+                affordanceNames.forEach(name => {
                     let affordanceTypes = [];
                     let affordance = affordances[name];
                     let types = affordance["@type"];
@@ -79,7 +79,7 @@ module.exports = function (RED) {
                     return;
                 }
             } else if (filterMode !== "@type") {
-                node.error(`Illegal filter mode "${filtermode}" defined!`);
+                node.error(`Illegal filter mode "${filterMode}" defined!`);
                 return;
             }
 
@@ -150,7 +150,7 @@ module.exports = function (RED) {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
-                case "invokeAction":
+                case "invokeAction": {
                     let invokedAction;
                     let constValue = _getConstValueInput(thingDescription, affordanceName);
                     if (constValue) {
@@ -165,6 +165,7 @@ module.exports = function (RED) {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
+                }
                 case "subscribeEvent":
                     thing.subscribeEvent(affordanceName).then(output => {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
@@ -225,7 +226,7 @@ module.exports = function (RED) {
                     resolve(consumedThing);
                     let identifier = _getTDIdentifier(thingDescription);
                     thingCache[identifier] = {servient: servient};
-                });
+                }).catch((err) => reject(err));
             });
         }
     }
