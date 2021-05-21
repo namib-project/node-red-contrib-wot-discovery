@@ -29,9 +29,6 @@ jobs:
         git config --global url."https://${{ secrets.PAT }}@github.com/".insteadOf ssh://git@github.com/
         npm ci
 
-    - name: Linting with jshint
-      run: npm run jshint
-
     - name: Perform tests and generate coverage report
       run: |
         npm test
