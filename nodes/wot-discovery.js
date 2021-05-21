@@ -6,7 +6,7 @@ module.exports = function (RED) {
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
-        let coapAddresses;
+        const coapAddresses = [];
 
         const contextVarKey = config.contextVar || "thingDescriptions";
         const contextVarType = config.contextVarType;
@@ -21,7 +21,7 @@ module.exports = function (RED) {
         // TODO: Add Implementations for MQTT
 
         if (config.useCoap) {
-            coapAddresses = _getCoapAddresses(config);
+            _getCoapAddresses();
         }
 
         if (msgOrContext === "context" || msgOrContext === "both") {
@@ -31,26 +31,23 @@ module.exports = function (RED) {
             }
         }
 
-        function _getCoapAddresses(config) {
-            const addresses = [];
+        function _getCoapAddresses() {
 
             if (config.coapUseIPv6) {
                 if (config.coapIPv6Address == "all") {
-                    addresses.push("[ff02::1]");
+                    coapAddresses.push("[ff02::1]");
                 } else if (config.coapIPv6Address == "coapOnly") {
-                    addresses.push("[ff02::fd]");
+                    coapAddresses.push("[ff02::fd]");
                 }
             }
 
             if (config.coapUseIPv4) {
                 if (config.coapIPv6Address == "all") {
-                    addresses.push("224.0.0.1");
+                    coapAddresses.push("224.0.0.1");
                 } else if (config.coapIPv6Address == "coapOnly") {
-                    addresses.push("224.0.1.187");
+                    coapAddresses.push("224.0.1.187");
                 }
             }
-
-            return addresses;
         }
 
         function _getContextVar() {
@@ -67,15 +64,14 @@ module.exports = function (RED) {
                 _resetContextVar();
             }
 
-            if (coapAddresses) {
-                coapAddresses.forEach((address) => {
-                    if (tdURI) {
-                        _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
-                    }
-                    if (coreURI) {
-                        _getDiscoveryLinks();
-                    }
-                });
+            coapAddresses.forEach(address => {
+                if (tdURI) {
+                    _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
+                }
+                if (coreURI) {
+                    _getDiscoveryLinks();
+                }
+            });
             }
 
             function _processThingDescriptionJSON(thingDescriptionJSON) {
