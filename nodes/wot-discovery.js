@@ -217,9 +217,9 @@ module.exports = function (RED) {
 
                         if (correctContentType && correctResourceType) {
                             const uri = url.parse(path);
-                            if(uri.host){
+                            if (uri.host) {
                                 _sendCoapDiscovery(uri.host, uri.path);
-                            }else{
+                            } else {
                                 _sendCoapDiscovery(`[${res.rsinfo.address}]`, uri.path);
                             }
                         }
