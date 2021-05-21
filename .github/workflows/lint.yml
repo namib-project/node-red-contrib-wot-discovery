@@ -1,0 +1,26 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: |
+          git config --global url."https://${{ secrets.PAT }}@github.com/".insteadOf ssh://git@github.com/
+          npm ci
+      - uses: sibiraj-s/action-eslint@v1
+        with:
+          # eslintArgs: '--ignore-path=.gitignore --quiet'
+          # extensions: 'js,jsx,ts,tsx'
+          annotations: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

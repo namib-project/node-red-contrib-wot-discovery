@@ -88,7 +88,7 @@ describe("WoTScriptingNode", function () {
                     const td = {blah: "hi"};
                     res.end(JSON.stringify(td));
                 }
-              })
+              });
 
             const testNodes = [injectNode, WoTDiscoveryNode, endTestNode];
             helper.load(testNodes, flow, function () {
