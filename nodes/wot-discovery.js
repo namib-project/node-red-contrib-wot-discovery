@@ -1,22 +1,22 @@
 module.exports = function (RED) {
     "use strict";
-    var coap = require("coap");
-    var url = require("uri-js");
+    const coap = require("coap");
+    const url = require("uri-js");
 
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this;
-        var coapAddresses;
+        const node = this;
+        let coapAddresses;
 
-        var contextVarKey = config.contextVar || "thingDescriptions";
-        var contextVarType = config.contextVarType;
-        var tdMsgProperty = config.msgProperty || "thingDescription";
-        var msgOrContext = config.msgOrContext;
-        var deleteExistingTDs = config.deleteExistingTDs != null ? config.deleteExistingTDs : true;
-        var coreURI = config.coreURI;
-        var tdURI = config.tdURI;
+        const contextVarKey = config.contextVar || "thingDescriptions";
+        const contextVarType = config.contextVarType;
+        const tdMsgProperty = config.msgProperty || "thingDescription";
+        const msgOrContext = config.msgOrContext;
+        const deleteExistingTDs = config.deleteExistingTDs != null ? config.deleteExistingTDs : true;
+        const coreURI = config.coreURI;
+        const tdURI = config.tdURI;
 
-        var timeouts = {};
+        const timeouts = {};
 
         // TODO: Add Implementations for MQTT and HTTP
 
@@ -25,14 +25,14 @@ module.exports = function (RED) {
         }
 
         if (msgOrContext === "context" || msgOrContext === "both") {
-            let contextVar = _getContextVar();
+            const contextVar = _getContextVar();
             if (!contextVar.get(contextVarKey)) {
                 contextVar.set(contextVarKey, {});
             }
         }
 
         function _getCoapAddresses(config) {
-            let addresses = [];
+            const addresses = [];
 
             if (config.coapUseIPv6) {
                 if (config.coapIPv6Address == "all") {
@@ -80,7 +80,7 @@ module.exports = function (RED) {
 
             function _processThingDescriptionJSON(thingDescriptionJSON) {
                 try {
-                    var thingDescription = JSON.parse(thingDescriptionJSON.toString());
+                    const thingDescription = JSON.parse(thingDescriptionJSON.toString());
                     _processThingDescription(thingDescription);
                 } catch (error) {
                     console.log(thingDescriptionJSON.toString());
@@ -103,8 +103,8 @@ module.exports = function (RED) {
                         node.error("Could not retrieve context variable.");
                         return;
                     }
-                    let storedTDs = contextVar.get(contextVarKey);
-                    let identifier = _getTDIdentifier(thingDescription);
+                    const storedTDs = contextVar.get(contextVarKey);
+                    const identifier = _getTDIdentifier(thingDescription);
                     storedTDs[identifier] = thingDescription;
                     if (config.timeoutRemoval) {
                         if (timeouts[identifier]) {
@@ -118,7 +118,7 @@ module.exports = function (RED) {
             }
 
             function _resetContextVar() {
-                let contextVar = _getContextVar();
+                const contextVar = _getContextVar();
                 if (!contextVar.get(contextVarKey)) {
                     contextVar.set(contextVarKey, {});
                 }
@@ -133,19 +133,19 @@ module.exports = function (RED) {
             }
 
             function _getTDIdentifier(thingDescription) {
-                let identifier = thingDescription.id || thingDescription.base || thingDescription.title;
+                const identifier = thingDescription.id || thingDescription.base || thingDescription.title;
                 return identifier;
             }
 
             function _sendCoapDiscovery(address, path) {
-                var reqOpts = url.parse(
+                const reqOpts = url.parse(
                     `coap://${address}${path}`
                 );
                 reqOpts.pathname = reqOpts.path;
                 reqOpts.method = "GET";
                 reqOpts.multicast = true;
                 reqOpts.Block2 = Buffer.of(0x5); // TODO: Make block-size adjustable
-                var req = coap.request(reqOpts);
+                const req = coap.request(reqOpts);
                 req.on("response", _onResponse);
                 req.on("error", function (err) {
                     node.log("client error");
@@ -199,8 +199,8 @@ module.exports = function (RED) {
                             }
 
                             currentValue = currentValue.split("=");
-                            let parameter = currentValue[0];
-                            let values = currentValue[1];
+                            const parameter = currentValue[0];
+                            const values = currentValue[1];
 
                             switch (parameter) {
                                 case "ct":
