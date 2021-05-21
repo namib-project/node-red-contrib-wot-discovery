@@ -69,10 +69,9 @@ module.exports = function (RED) {
                     _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
                 }
                 if (coreURI) {
-                    _getDiscoveryLinks();
+                    _getDiscoveryLinks(address);
                 }
             });
-            }
 
             function _processThingDescriptionJSON(thingDescriptionJSON) {
                 try {
@@ -150,24 +149,52 @@ module.exports = function (RED) {
                 req.end();
             }
 
-            function _getDiscoveryLinks(){
-                if (config.useCoap) {
-                    coapAddresses.forEach(address => {
-                        const reqOpts = url.parse(`coap://${address}/.well-known/core`);
-                        reqOpts.pathname = reqOpts.path;
-                        reqOpts.query ="rt=wot.thing";
-                        reqOpts.multicast = true;
-                        const req = coap.request(reqOpts);
-                        req.on("response", function (res) {
-                            _coreResponse(res);
-                        });
-                        req.on("error", function (err) {
-                            node.log("client error");
-                            node.log(err);
-                        });
-                        req.end();
+            function _getDiscoveryLinks(address){
+                const reqOpts = url.parse(`coap://${address}/.well-known/core`);
+                reqOpts.pathname = reqOpts.path;
+                reqOpts.query ='rt=wot.thing';
+                reqOpts.multicast = true;
+                reqOpts.method = "GET";
+                const req = coap.request(reqOpts);
+                req.on("response", function (res) {
+                    _coreResponse(res);
+                });
+                req.on("error", function (err) {
+                    node.log("client error");
+                    node.log(err);
+                });
+                req.end();
+            }
+
+            function _parseCoreLinkFormat(linksAsString) {
+                const links = linksAsString.split(",").map(link => {
+                    return link.split(";");
+                });
+
+                return links.reduce((results, link) => {
+                    let errorOccured = false;
+                    const linkObject = {};
+                    link.forEach(function (currentValue, index) {
+                        if (index === 0 && (/^<\/[^<>]*>$/g).test(currentValue)) {
+                                linkObject.uri = currentValue.substring(1, currentValue.length -1);
+                        } else {
+                            try {
+                                const query = currentValue.split("=");
+                                const parameter = query[0];
+                                const args = query[1].replace(/["]+/g, '').split(" ");
+                                linkObject[parameter] = args;
+                            } catch (error) {
+                                errorOccured = true;
+                            }
+                        }
                     });
-                }
+
+                    if ("uri" in linkObject && ! errorOccured) {
+                        results.push(linkObject);
+                    }
+                    
+                    return results;
+                }, []);
             }
 
             function _coreResponse(res){
