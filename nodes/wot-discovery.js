@@ -216,7 +216,12 @@ module.exports = function (RED) {
                         });
 
                         if (correctContentType && correctResourceType) {
-                            _sendCoapDiscovery(`[${res.rsinfo.address}]`, path);
+                            const uri = url.parse(path);
+                            if(uri.host){
+                                _sendCoapDiscovery(uri.host, uri.path)
+                            }else{
+                                _sendCoapDiscovery(`[${res.rsinfo.address}]`, uri.path);
+                            }
                         }
                     });
                 }
