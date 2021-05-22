@@ -11,9 +11,6 @@
             coapIPv4Address: { value: "all" },
             useMqtt: { value: "" },
             mqttBrokerAddress: { value: "" },
-            useHttp: { value: true },
-            httpUseIPv6: { value: true },
-            httpUseIPv4: { value: false },
             timeoutRemoval: { value: true },
             removalTime: { value: 15 },
             msgOrContext: { value: "msg" },
@@ -266,39 +263,6 @@
             id="node-input-mqttBrokerAddress"
             placeholder="mqtt://"
         />
-    </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-useHttp"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-useHttp" style="width: auto">
-            Use HTTP for discovery
-        </label>
-    </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-httpUseIPv6"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-httpUseIPv6" style="width: auto">
-            Use IPv6 multicast
-        </label>
-    </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-httpUseIPv4"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-httpUseIPv4" style="width: auto">
-            Use IPv4 multicast
-        </label>
     </div>
 </script>
 
