@@ -7,6 +7,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         const node = this;
         const coapAddresses = [];
+        const coreRDAddresses = [];
 
         const contextVarKey = config.contextVar || "thingDescriptions";
         const contextVarType = config.contextVarType;
@@ -22,6 +23,10 @@ module.exports = function (RED) {
 
         if (config.useCoap) {
             _getCoapAddresses();
+
+            if (config.useCoreRD) {
+                _getcoreRDAddresses();
+            }
         }
 
         if (msgOrContext === "context" || msgOrContext === "both") {
@@ -42,11 +47,21 @@ module.exports = function (RED) {
             }
 
             if (config.coapUseIPv4) {
-                if (config.coapIPv6Address == "all") {
+                if (config.coapIPv4Address == "all") {
                     coapAddresses.push("224.0.0.1");
-                } else if (config.coapIPv6Address == "coapOnly") {
+                } else if (config.coapIPv4Address == "coapOnly") {
                     coapAddresses.push("224.0.1.187");
                 }
+            }
+        }
+
+        function _getcoreRDAddresses() {
+            if (config.coreRDUseIPv6) {
+                coreRDAddresses.push("[ff02::fe]");
+            }
+
+            if (config.coreRDUseIPv4) {
+                coreRDAddresses.push("224.0.1.189");
             }
         }
 
@@ -72,6 +87,74 @@ module.exports = function (RED) {
                     _getDiscoveryLinks(address);
                 }
             });
+
+            coreRDAddresses.forEach(address => {
+                _performResourceDirectoryDiscovery(address);
+            });
+
+            function _performResourceDirectoryDiscovery(address) {
+                const reqOpts = url.parse(
+                    `coap://${address}/.well-known/core?rt=core.rd-lookup-res&ct=40`
+                );
+                reqOpts.pathname = reqOpts.path;
+                reqOpts.method = "GET";
+                reqOpts.multicast = true;
+                const req = coap.request(reqOpts);
+                req.on("response", _performRDLookUp);
+                req.on("error", function (err) {
+                    node.log("client error");
+                    node.log(err);
+                });
+                req.end();
+            }
+
+            function _performRDLookUp(res) {
+                res.on("data", (data) => {
+                    const links = _parseCoreLinkFormat(data.toString());
+
+                    links.forEach(link => {
+                        try {
+                            if (link.ct.includes("40") && link.rt.includes("core.rd-lookup-res")) {
+                                const uri = url.parse(link.uri);
+                                const address = _getResourceAddress(uri, res);
+
+                                if (uri.scheme && uri.scheme !== "coap") {
+                                    // Only CoAP is supported so far
+                                    return;
+                                } else {
+                                    const reqOpts = url.parse(
+                                        `coap://${address}${uri.path}?rt=wot.thing`
+                                    );
+                                    reqOpts.pathname = reqOpts.path;
+                                    reqOpts.method = "GET";
+                                    const req = coap.request(reqOpts);
+                                    req.on("response", _coreResponse);
+                                    req.on("error", function (err) {
+                                        node.log("client error");
+                                        node.log(err);
+                                    });
+                                    req.end();
+                                }
+                            }
+                        } catch (error) {
+                            node.log(error);
+                            return;
+                        }
+                    });
+                });
+            }
+
+            function _getResourceAddress(uri, res) {
+                if (uri.host) {
+                    return uri.host;
+                }
+
+                let address = res.rsinfo.address;
+                if (res.rsinfo.family && res.rsinfo.family === "IPv6") {
+                    address = `[${address}]`;
+                }
+                return address;
+            }
 
             function _processThingDescriptionJSON(thingDescriptionJSON) {
                 try {
@@ -173,8 +256,8 @@ module.exports = function (RED) {
                     let errorOccured = false;
                     const linkObject = {};
                     link.forEach(function (currentValue, index) {
-                        if (index === 0 && (/^<\/[^<>]*>$/g).test(currentValue)) {
-                                linkObject.uri = currentValue.substring(1, currentValue.length -1);
+                        if (index === 0 && (/^<[^<>]*>$/g).test(currentValue)) {
+                            linkObject.uri = currentValue.substring(1, currentValue.length -1);
                         } else {
                             try {
                                 const query = currentValue.split("=");
@@ -201,12 +284,12 @@ module.exports = function (RED) {
                         const links = _parseCoreLinkFormat(data.toString());
 
                         links.forEach(link => {
-                            const correctResourceType = "rt" in link && link.rt.includes('"wot.thing"');
+                            const correctResourceType = "rt" in link && link.rt.includes('wot.thing');
                             const correctContentType = "ct" in link && link.ct.includes("432");
 
                             if (correctContentType && correctResourceType) {
                                 const uri = url.parse(link.uri);
-                                const address = uri.host ? uri.host : `[${res.rsinfo.address}]`;
+                                const address = _getResourceAddress(uri, res);
                                 _sendCoapDiscovery(address, uri.path);
                             }
                         });
