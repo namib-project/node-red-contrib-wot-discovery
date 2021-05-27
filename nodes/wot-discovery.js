@@ -1,3 +1,15 @@
+/**
+ * Node-RED node that can discover WoT Thing Descriptions using CoAP and MQTT.
+ * @module node-red-contrib-wot-discovery/wot-discovery
+ */
+
+
+/**
+ * 
+ * The definition of the wot-discovery node.
+ * 
+ * @param {*} RED 
+ */
 module.exports = function (RED) {
     "use strict";
     const mqtt = require("mqtt");
@@ -7,7 +19,13 @@ module.exports = function (RED) {
     const mqttDiscoveryTopicBase = "wot/td";
     const mqttDiscoveryTopic = mqttDiscoveryTopicBase + "/#";
 
+    /**
+     *
+     *
+     * @param {*} config
+     */
     function WoTDiscoveryNode(config) {
+        
         RED.nodes.createNode(this, config);
         const node = this;
         const coapAddresses = [];
@@ -44,7 +62,12 @@ module.exports = function (RED) {
             }
         }
 
-        function _getCoapAddresses() {
+       /**
+        * 
+        * @param {*} config
+        * @return {*} 
+        */
+       function _getCoapAddresses() {
 
             if (config.coapUseIPv6) {
                 if (config.coapIPv6Address == "all") {
@@ -73,6 +96,11 @@ module.exports = function (RED) {
             }
         }
 
+        /**
+         *
+         *
+         * @return {*} 
+         */
         function _getContextVar() {
             if (contextVarType === "flow") {
                 return node.context().flow;
@@ -168,6 +196,11 @@ module.exports = function (RED) {
                 return address;
             }
 
+            /**
+             *
+             *
+             * @param {*} thingDescriptionJSON
+             */
             function _processThingDescriptionJSON(thingDescriptionJSON) {
                 try {
                     const thingDescription = JSON.parse(thingDescriptionJSON.toString());
@@ -178,6 +211,12 @@ module.exports = function (RED) {
                 }
             }
 
+            /**
+             *
+             *
+             * @param {*} thingDescription
+             * @return {*} 
+             */
             function _processThingDescription(thingDescription) {
                 if (msgOrContext === "msg" || msgOrContext === "both") {
                     msg[tdMsgProperty] = thingDescription;
@@ -207,6 +246,10 @@ module.exports = function (RED) {
                 }
             }
 
+            /**
+             *
+             *
+             */
             function _resetContextVar() {
                 const contextVar = _getContextVar();
                 if (!contextVar.get(contextVarKey)) {
@@ -214,6 +257,11 @@ module.exports = function (RED) {
                 }
             }
 
+            /**
+             *
+             *
+             * @param {*} res
+             */
             function _onResponse(res) {
                 res.on("data", (data) => {
                     if (res.headers["Content-Format"] === "application/json") {
@@ -222,11 +270,23 @@ module.exports = function (RED) {
                 });
             }
 
+            /**
+             *
+             *
+             * @param {*} thingDescription
+             * @return {*} 
+             */
             function _getTDIdentifier(thingDescription) {
                 const identifier = thingDescription.id || thingDescription.base || thingDescription.title;
                 return identifier;
             }
 
+            /**
+             *
+             *
+             * @param {*} address
+             * @param {*} path
+             */
             function _sendCoapDiscovery(address, path) {
                 const reqOpts = url.parse(
                     `coap://${address}${path}`
@@ -244,6 +304,10 @@ module.exports = function (RED) {
                 req.end();
             }
 
+            /**
+             *
+             *
+             */
             function _getDiscoveryLinks(address){
                 const reqOpts = url.parse(`coap://${address}/.well-known/core`);
                 reqOpts.pathname = reqOpts.path;
@@ -259,6 +323,11 @@ module.exports = function (RED) {
                 req.end();
             }
 
+            /**
+             *
+             *
+             * @param {*} res
+             */
             function _parseCoreLinkFormat(linksAsString) {
                 const links = linksAsString.split(",").map(link => {
                     return link.split(";");
@@ -290,6 +359,11 @@ module.exports = function (RED) {
                 }, []);
             }
 
+            /**
+             *
+             *
+             * @param {*} res
+             */
             function _coreResponse(res){
                 res.on("data", (data) => {
                     if (res.headers["Content-Format"] === "application/link-format") {
