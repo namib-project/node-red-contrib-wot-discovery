@@ -1,10 +1,13 @@
 module.exports = function (RED) {
     "use strict";
+    // Set the module dependencies
     const { Servient, Helpers } = require("@node-wot/core");
     const { HttpClientFactory } = require('@node-wot/binding-http');
     const { CoapClientFactory } = require('@node-wot/binding-coap');
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
 
+    /** Set the possible affordance types that can be chosen from and defines 
+     * the kind of affordance */
     const operationsToAffordanceType = {
         readProperty: "properties",
         writeProperty: "properties",
@@ -21,6 +24,8 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
 
+            /* Parameters to the node are read here. Data from the input message is prefered over 
+            the definition inside the Node-RED node. */
             var operationType = config.operationType || msg.operationType;
             var affordanceName = config.affordanceName || msg.affordanceName;
             var type = config.affordanceType || msg.affordanceType;
@@ -37,14 +42,20 @@ module.exports = function (RED) {
                 return;
             }
 
+            /* msg.thingDescription shall include the thing description that can be gathered
+            using the WoT Dicovery node provided with this module. */
             var thingDescription = msg.thingDescription;
 
             var foundAffordances = [];
 
             var affordances = thingDescription[affordanceType];
 
+            // Get a list of affordances the device provides
             const affordanceNames = Object.keys(affordances);
 
+            /* If not the name of the affordance, that shall be fetched, is given
+            run this to find the affordances by the given string and write it to
+            foundAffordances */
             if (config.filterMode !== "affordanceName") {
                 affordanceNames.forEach((name, index) => {
                     let affordanceTypes = [];
@@ -66,18 +77,22 @@ module.exports = function (RED) {
 
             let filterMode = config.filterMode;
 
+            /* In case both methods have been selected prefer the affordanceName match
+            if any */
             if (filterMode === "both") {
                 if (foundAffordances.includes(affordanceName)) {
                     foundAffordances = [affordanceName];
                 } else {
                     return;
                 }
+            // If affordanceName has been selected, use this and quit if not found
             } else if (filterMode === "affordanceName") {
                 if (affordanceNames.includes(affordanceName)) {
                     foundAffordances = [affordanceName];
                 } else {
                     return;
                 }
+            // Quit with an error message if filter type has been set to an illegal value
             } else if (filterMode !== "@type") {
                 node.error(`Illegal filter mode "${filtermode}" defined!`);
                 return;
@@ -85,6 +100,8 @@ module.exports = function (RED) {
 
             let identifier = _getTDIdentifier(thingDescription);
 
+            /* Gather the affordances and use cached data if available. Delete the cache
+            if the timeout specified has been reached */
             try {
                 if (thingCache[identifier]) {
                     performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
@@ -111,6 +128,18 @@ module.exports = function (RED) {
             }
         });
 
+        /**
+         * Serially perform multiple operations on a device
+         * 
+         * @param {Object} thing The recent thing description 
+         * @param {String} operationType The operation that shall be performed
+         * @param {String} affordanceName The name of the affordance the operation shall be performed on
+         * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
+         * @param {*} inputValue A value that will be sent in the operation (depending on the type)
+         * @param {String} outputVar An attribute name the returned value will be written to
+         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+         */
         function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload) {
             foundAffordances.forEach((affordance) => {
                 performOperationOnThing(
@@ -127,6 +156,18 @@ module.exports = function (RED) {
         }
 
         // TODO: This signature has to be shortened
+        /**
+         * Actually perform the operation that has been chosen on the device
+         *
+         * @param {Object} thing The recent thing description 
+         * @param {String} operationType The operation that shall be performed
+         * @param {String} affordanceName The name of the affordance the operation shall be performed on
+         * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
+         * @param {*} inputValue A value that will be sent in the operation (depending on the type)
+         * @param {String} outputVar An attribute name the returned value will be written to
+         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+         */
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType, outputPayload) {
 
             let thingDescription = thing.getThingDescription();
@@ -176,6 +217,13 @@ module.exports = function (RED) {
             }
         }
 
+        /**
+         * Get the constant value of an action
+         *
+         * @param {Object} thingDescription
+         * @param {String} affordanceName The affordanceName of the action
+         * @return {Number} The Value or null if an error occurred
+         */
         function _getConstValueInput(thingDescription, affordanceName) {
             try {
                 let affordance = thingDescription.actions[affordanceName];
@@ -185,6 +233,15 @@ module.exports = function (RED) {
             }
         }
 
+        /**
+         * Handle the output of the device
+         *
+         * @param {Object} msg The message this node will send
+         * @param {Object} output The output received by the device 
+         * @param {String} outputVar The attribute's name the output is going to be saved
+         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+         */
         function _handleOutput(msg, output, outputVar, outputVarType, outputPayload) {
             if (typeof output !== "undefined") {
                 if (outputVarType === "msg") {
@@ -205,6 +262,12 @@ module.exports = function (RED) {
             node.send(msg);
         }
 
+        /**
+         * Get id, base URL and the title of a thing description
+         *
+         * @param {Object} thingDescription Object as provided by the WoT Discovery node
+         * @return {Object} Identifier object providing the attributes id, base and title
+         */
         function _getTDIdentifier(thingDescription) {
             let identifier =
                 thingDescription.id ||
@@ -213,6 +276,12 @@ module.exports = function (RED) {
             return identifier;
         }
 
+        /**
+         * Get the thing description of a device and save the data in the cache
+         *
+         * @param {Object} thingDescription Object as provided by the WoT Discovery node
+         * @return {Object} Object as provided by the WoT Discovery node
+         */
         function _getConsumedThing(thingDescription) {
             return new Promise((resolve, reject) => {
                 let servient = new Servient();
