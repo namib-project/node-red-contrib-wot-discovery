@@ -26,9 +26,9 @@ module.exports = function (RED) {
 
             /* Parameters to the node are read here. Data from the input message is prefered over 
             the definition inside the Node-RED node. */
-            var operationType = config.operationType || msg.operationType;
-            var affordanceName = config.affordanceName || msg.affordanceName;
-            var type = config.affordanceType || msg.affordanceType;
+            var operationType = msg.operationType || config.operationType;
+            var affordanceName = msg.affordanceName || config.affordanceName;
+            var type = msg.affordanceType || config.affordanceType;
             var inputValue = msg.payload || config.inputValue;
             var outputVar = msg.outputVar || config.outputVar || "payload";
             var outputPayload = config.outputPayload;
@@ -56,7 +56,10 @@ module.exports = function (RED) {
             /* If not the name of the affordance, that shall be fetched, is given
             run this to find the affordances by the given string and write it to
             foundAffordances */
-            if (config.filterMode !== "affordanceName") {
+            
+            let filterMode = config.filterMode;
+
+            if (filterMode !== "affordanceName") {
                 affordanceNames.forEach((name, index) => {
                     let affordanceTypes = [];
                     let affordance = affordances[name];
@@ -73,29 +76,26 @@ module.exports = function (RED) {
                         foundAffordances.push(affordanceName);
                     }
                 });
-            }
-
-            let filterMode = config.filterMode;
-
-            /* In case both methods have been selected prefer the affordanceName match
-            if any */
-            if (filterMode === "both") {
-                if (foundAffordances.includes(affordanceName)) {
-                    foundAffordances = [affordanceName];
-                } else {
+                // In case both methods have been selected prefer the affordanceName match if any
+                if (filterMode === "both") {
+                    if (foundAffordances.includes(affordanceName)) {
+                        foundAffordances = [affordanceName];
+                    } else {
+                        return;
+                    }
+                // Quit with an error message if filter type has been set to an illegal value
+                } else if (filterMode !== "@type") {
+                    node.error(`Illegal filter mode "${filtermode}" defined!`);
                     return;
                 }
+            }
             // If affordanceName has been selected, use this and quit if not found
-            } else if (filterMode === "affordanceName") {
+            else {
                 if (affordanceNames.includes(affordanceName)) {
                     foundAffordances = [affordanceName];
                 } else {
                     return;
                 }
-            // Quit with an error message if filter type has been set to an illegal value
-            } else if (filterMode !== "@type") {
-                node.error(`Illegal filter mode "${filtermode}" defined!`);
-                return;
             }
 
             let identifier = _getTDIdentifier(thingDescription);
