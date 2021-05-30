@@ -21,6 +21,9 @@
             deleteExistingTDs: { value: true },
             coreURI: {value: false},
             tdURI: {value: true},
+            useCoreRD: { value: false },
+            coreRDUseIPv6: { value: false },
+            coreRDUseIPv4: { value: false },
         },
         inputs: 1,
         outputs: 1,
@@ -79,9 +82,11 @@
                 if ($("#node-input-useCoap").is(":checked")) {
                     $("#node-input-coapUseIPv6-row").show();
                     $("#node-input-coapUseIPv4-row").show();
+                    $("#node-input-useCoreRD-row").show();
                 } else {
                     $("#node-input-coapUseIPv6-row").hide();
                     $("#node-input-coapUseIPv4-row").hide();
+                    $("#node-input-useCoreRD-row").hide();
                 }
             }
             if (this.useCoap) {
@@ -241,6 +246,40 @@
                 </select>
             </div>
         </div>
+
+        <div id="node-input-useCoreRD-row" class="form-row hide">
+            <input
+                type="checkbox"
+                id="node-input-useCoreRD"
+                style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-useCoreRD" style="width: auto">
+                Discover from CoRE Resource Directories
+            </label>
+    
+            <div id="node-input-coreRDUseIPv6-row">
+                <input
+                    type="checkbox"
+                    id="node-input-coreRDUseIPv6"
+                    style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-coreRDUseIPv6" style="width: auto">
+                    Use IPv6 multicast
+                </label>
+            </div>
+    
+            <div id="node-input-coreRDUseIPv4-row">
+                <input
+                    type="checkbox"
+                    id="node-input-coreRDUseIPv4"
+                    style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-coreRDUseIPv4" style="width: auto">
+                    Use IPv4 multicast
+                </label>
+            </div>
+        </div>
+
     </div>
 
     <div class="form-row">
@@ -268,7 +307,7 @@
 
 <script type="text/html" data-help-name="wot-discovery">
     <p>
-        A simple node that converts the message payloads into all lower-case
-        characters
+        Node that supports multiple methods for discovering WoT Thing Descriptions 
+        using CoAP.
     </p>
 </script>

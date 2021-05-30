@@ -6,7 +6,8 @@ module.exports = function (RED) {
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
-        let coapAddresses;
+        const coapAddresses = [];
+        const coreRDAddresses = [];
 
         const contextVarKey = config.contextVar || "thingDescriptions";
         const contextVarType = config.contextVarType;
@@ -21,7 +22,11 @@ module.exports = function (RED) {
         // TODO: Add Implementations for MQTT
 
         if (config.useCoap) {
-            coapAddresses = _getCoapAddresses(config);
+            _getCoapAddresses();
+
+            if (config.useCoreRD) {
+                _getcoreRDAddresses();
+            }
         }
 
         if (msgOrContext === "context" || msgOrContext === "both") {
@@ -31,26 +36,33 @@ module.exports = function (RED) {
             }
         }
 
-        function _getCoapAddresses(config) {
-            const addresses = [];
+        function _getCoapAddresses() {
 
             if (config.coapUseIPv6) {
                 if (config.coapIPv6Address == "all") {
-                    addresses.push("[ff02::1]");
+                    coapAddresses.push("[ff02::1]");
                 } else if (config.coapIPv6Address == "coapOnly") {
-                    addresses.push("[ff02::fd]");
+                    coapAddresses.push("[ff02::fd]");
                 }
             }
 
             if (config.coapUseIPv4) {
-                if (config.coapIPv6Address == "all") {
-                    addresses.push("224.0.0.1");
-                } else if (config.coapIPv6Address == "coapOnly") {
-                    addresses.push("224.0.1.187");
+                if (config.coapIPv4Address == "all") {
+                    coapAddresses.push("224.0.0.1");
+                } else if (config.coapIPv4Address == "coapOnly") {
+                    coapAddresses.push("224.0.1.187");
                 }
             }
+        }
 
-            return addresses;
+        function _getcoreRDAddresses() {
+            if (config.coreRDUseIPv6) {
+                coreRDAddresses.push("[ff02::fe]");
+            }
+
+            if (config.coreRDUseIPv4) {
+                coreRDAddresses.push("224.0.1.189");
+            }
         }
 
         function _getContextVar() {
@@ -67,15 +79,81 @@ module.exports = function (RED) {
                 _resetContextVar();
             }
 
-            if (coapAddresses) {
-                coapAddresses.forEach((address) => {
-                    if (tdURI) {
-                        _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
-                    }
-                    if (coreURI) {
-                        _getDiscoveryLinks();
-                    }
+            coapAddresses.forEach(address => {
+                if (tdURI) {
+                    _sendCoapDiscovery(address, "/.well-known/wot-thing-description");
+                }
+                if (coreURI) {
+                    _getDiscoveryLinks(address);
+                }
+            });
+
+            coreRDAddresses.forEach(address => {
+                _performResourceDirectoryDiscovery(address);
+            });
+
+            function _performResourceDirectoryDiscovery(address) {
+                const reqOpts = url.parse(
+                    `coap://${address}/.well-known/core?rt=core.rd-lookup-res&ct=40`
+                );
+                reqOpts.pathname = reqOpts.path;
+                reqOpts.method = "GET";
+                reqOpts.multicast = true;
+                const req = coap.request(reqOpts);
+                req.on("response", _performRDLookUp);
+                req.on("error", function (err) {
+                    node.log("client error");
+                    node.log(err);
                 });
+                req.end();
+            }
+
+            function _performRDLookUp(res) {
+                res.on("data", (data) => {
+                    const links = _parseCoreLinkFormat(data.toString());
+
+                    links.forEach(link => {
+                        try {
+                            if (link.ct.includes("40") && link.rt.includes("core.rd-lookup-res")) {
+                                const uri = url.parse(link.uri);
+                                const address = _getResourceAddress(uri, res);
+
+                                if (uri.scheme && uri.scheme !== "coap") {
+                                    // Only CoAP is supported so far
+                                    return;
+                                } else {
+                                    const reqOpts = url.parse(
+                                        `coap://${address}${uri.path}?rt=wot.thing`
+                                    );
+                                    reqOpts.pathname = reqOpts.path;
+                                    reqOpts.method = "GET";
+                                    const req = coap.request(reqOpts);
+                                    req.on("response", _coreResponse);
+                                    req.on("error", function (err) {
+                                        node.log("client error");
+                                        node.log(err);
+                                    });
+                                    req.end();
+                                }
+                            }
+                        } catch (error) {
+                            node.log(error);
+                            return;
+                        }
+                    });
+                });
+            }
+
+            function _getResourceAddress(uri, res) {
+                if (uri.host) {
+                    return uri.host;
+                }
+
+                let address = res.rsinfo.address;
+                if (res.rsinfo.family && res.rsinfo.family === "IPv6") {
+                    address = `[${address}]`;
+                }
+                return address;
             }
 
             function _processThingDescriptionJSON(thingDescriptionJSON) {
@@ -154,80 +232,70 @@ module.exports = function (RED) {
                 req.end();
             }
 
-            function _getDiscoveryLinks(){
-                if (config.useCoap) {
-                    coapAddresses.forEach(address => {
-                        const reqOpts = url.parse(`coap://${address}/.well-known/core`);
-                        reqOpts.pathname = reqOpts.path;
-                        reqOpts.query ="rt=wot.thing";
-                        reqOpts.multicast = true;
-                        const req = coap.request(reqOpts);
-                        req.on("response", function (res) {
-                            _coreResponse(res);
-                        });
-                        req.on("error", function (err) {
-                            node.log("client error");
-                            node.log(err);
-                        });
-                        req.end();
-                    });
-                }
+            function _getDiscoveryLinks(address){
+                const reqOpts = url.parse(`coap://${address}/.well-known/core`);
+                reqOpts.pathname = reqOpts.path;
+                reqOpts.query ='rt=wot.thing';
+                reqOpts.multicast = true;
+                reqOpts.method = "GET";
+                const req = coap.request(reqOpts);
+                req.on("response", _coreResponse);
+                req.on("error", function (err) {
+                    node.log("client error");
+                    node.log(err);
+                });
+                req.end();
             }
 
-        function _coreResponse(res){
-            res.on("data", (data) => {
-                 if (res.headers["Content-Format"] === "application/link-format") {
-                    let links = data.toString().split(',');
-                    
-                    links = links.map(link => {
-                        return link.split(";");
-                    });
-                    
-                    links.forEach(link => {
+            function _parseCoreLinkFormat(linksAsString) {
+                const links = linksAsString.split(",").map(link => {
+                    return link.split(";");
+                });
 
-                        let correctResourceType = false;
-                        let correctContentType = false;
-                        let path;
-
-                        link.forEach(function (currentValue, index) {
-                            if (index === 0 && (/^<\/.*>$/g).test(currentValue) && currentValue.match(/<|>/g).length === 2) {
-                                //the first value starts with < ends with > and only contains exactly two characters of < or > characters
-                                path = currentValue.substring(2, currentValue.length - 1);
-                                return;
-                            } else if (!path) {
-                                return;
-                            }
-
-                            currentValue = currentValue.split("=");
-                            const parameter = currentValue[0];
-                            const values = currentValue[1];
-
-                            switch (parameter) {
-                                case "ct":
-                                    if (values === "432") {
-                                        correctContentType = true;
-                                    }
-                                    break;
-                                case "rt":
-                                    if (values === '"wot.thing"') {
-                                        correctResourceType = true;
-                                    }
-                                    break;
-                            }
-                        });
-
-                        if (correctContentType && correctResourceType) {
-                            const uri = url.parse(path);
-                            if (uri.host) {
-                                _sendCoapDiscovery(uri.host, uri.path);
-                            } else {
-                                _sendCoapDiscovery(`[${res.rsinfo.address}]`, uri.path);
+                return links.reduce((results, link) => {
+                    let errorOccured = false;
+                    const linkObject = {};
+                    link.forEach(function (currentValue, index) {
+                        if (index === 0 && (/^<[^<>]*>$/g).test(currentValue)) {
+                            linkObject.uri = currentValue.substring(1, currentValue.length -1);
+                        } else {
+                            try {
+                                const query = currentValue.split("=");
+                                const parameter = query[0];
+                                const args = query[1].replace(/["]+/g, '').split(" ");
+                                linkObject[parameter] = args;
+                            } catch (error) {
+                                errorOccured = true;
                             }
                         }
                     });
-                }
-            });
-        }
+
+                    if ("uri" in linkObject && ! errorOccured) {
+                        results.push(linkObject);
+                    }
+                    
+                    return results;
+                }, []);
+            }
+
+            function _coreResponse(res){
+                res.on("data", (data) => {
+                    if (res.headers["Content-Format"] === "application/link-format") {
+                        const links = _parseCoreLinkFormat(data.toString());
+
+                        links.forEach(link => {
+                            const correctResourceType = "rt" in link && link.rt.includes('wot.thing');
+                            const correctContentType = "ct" in link && link.ct.includes("432");
+
+                            if (correctContentType && correctResourceType) {
+                                const uri = url.parse(link.uri);
+                                const address = _getResourceAddress(uri, res);
+                                _sendCoapDiscovery(address, uri.path);
+                            }
+                        });
+                    }
+                });
+            }
         });
     }
     RED.nodes.registerType("wot-discovery", WoTDiscoveryNode);
