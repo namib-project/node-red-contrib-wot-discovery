@@ -3,34 +3,37 @@ const helper = require("node-red-node-test-helper");
 const coap = require("coap");
 const url = require("uri-js");
 
-describe("WoTScriptingNode", function () {
+describe("WoTDiscoveryNode", function () {
+
+    let coapServer;
+
     beforeEach(function (done) {
         helper.startServer(done);
     });
 
     afterEach(function (done) {
         helper.unload().then(function () {
+            if (coapServer) {
+                coapServer.close();
+            }
             helper.stopServer(done);
         });
     });
 
-    it("should be loaded", function (done) {
-        const flow = [
-            {
-                id: "n1",
-                type: "wot-discovery",
-            },
-        ];
-        //need to register nodes in order to use them
-        const testNodes = [WoTDiscoveryNode];
-        helper.load(testNodes, flow, function () {
-            done();
-        });
-    });
+    const testIterationData = [
+        {
+            type: "IPv4",
+            coapUseIPv6: false
+        }, {
+            type: "IPv6",
+            coapUseIPv6: true
+        }
+    ];
 
-    describe("CoAP Discovery", function () {
+    testIterationData.forEach(iterationData => {
 
-        it("should support multicast discovery from /.well-known/core", function (done) {
+
+        it(`should support ${iterationData.type} multicast discovery from /.well-known/core`, function (done) {
             const flow = [
                 {
                     id: "n1",
@@ -38,8 +41,10 @@ describe("WoTScriptingNode", function () {
                     useCoap: true,
                     coreURI: true,
                     tdURI: false,
-                    coapUseIPv6: true,
+                    coapUseIPv4: !iterationData.coapUseIPv6,
+                    coapUseIPv6: iterationData.coapUseIPv6,
                     coapIPv6Address: "all",
+                    coapIPv4Address: "all",
                     msgOrContext: "msg",
                     wires: [["n2"]],
                 },
@@ -55,7 +60,7 @@ describe("WoTScriptingNode", function () {
                     RED.nodes.createNode(this, n);
                     this.on("input", function (msg) {
                         msg.thingDescription
-                            .should.eql({blah: "hi"}); // Not a valid TD yet...
+                            .should.eql({ blah: "hi" }); // Not a valid TD yet...
                         done();
                     });
                 }
@@ -65,10 +70,20 @@ describe("WoTScriptingNode", function () {
                 );
             }
 
-            const settings = {type: "udp6", reuseAddr: true, multicastAddress: "ff02::1", multicastInterface: "::1"};
-            const server = new coap.createServer(settings);
+            const settings = { reuseAddr: true };
 
-            server.on('request', function(req, res) {
+            if (iterationData.type === "IPv6") {
+                settings.type = "udp6";
+                settings.multicastAddress = "ff02::1";
+                settings.multicastInterface = "::1";
+            } else {
+                settings.type = "udp4";
+                settings.multicastAddress = "224.0.0.1";
+            }
+
+            coapServer = new coap.createServer(settings);
+
+            coapServer.on('request', function (req, res) {
                 const path = url.parse(req.url).path;
 
                 if (path === "/.well-known/core") {
@@ -76,16 +91,88 @@ describe("WoTScriptingNode", function () {
                     res.end('</test>;rt="wot.thing";ct=432');
                 } else if (path === "/test") {
                     res.setOption("Content-Format", "application/json");
-                    const td = {blah: "hi"};
+                    const td = { blah: "hi" };
                     res.end(JSON.stringify(td));
                 }
-              });
+            });
 
             const testNodes = [WoTDiscoveryNode, endTestNode];
             helper.load(testNodes, flow, function () {
                 const n1 = helper.getNode("n1");
-                server.listen(5683);
-                n1.emit("input", {payload:null});
+                coapServer.listen(5683);
+                n1.emit("input", { payload: null });
+            });
+        });
+
+        it(`should support resource directory using ${iterationData.type}`, function (done) {
+            const flow = [
+                {
+                    id: "n1",
+                    type: "wot-discovery",
+                    useCoap: true,
+                    useCoreRD: true,
+                    coreRDUseIPv6: iterationData.coapUseIPv6,
+                    coreRDUseIPv4: !iterationData.coapUseIPv6,
+                    tdURI: false,
+                    msgOrContext: "msg",
+                    wires: [["n2"]],
+                },
+                {
+                    id: "n2",
+                    type: "end-test-node",
+                    name: "end-test-node",
+                },
+            ];
+
+            function endTestNode(RED) {
+                function EndTestNode(n) {
+                    RED.nodes.createNode(this, n);
+                    this.on("input", function (msg) {
+                        msg.thingDescription
+                            .should.eql({ blah: "hi" }); // Not a valid TD yet...
+                        done();
+                    });
+                }
+                RED.nodes.registerType(
+                    "end-test-node",
+                    EndTestNode
+                );
+            }
+
+            const settings = { reuseAddr: true };
+
+            if (iterationData.type === "IPv6") {
+                settings.type = "udp6";
+                settings.multicastAddress = "ff02::fe";
+                settings.multicastInterface = "::1";
+            } else {
+                settings.type = "udp4";
+                settings.multicastAddress = "224.0.1.189";
+            }
+
+            coapServer = new coap.createServer(settings);
+
+            coapServer.on('request', function (req, res) {
+                const parsedUrl = url.parse(req.url);
+
+                if (parsedUrl.path === "/rd-lookup/res") {
+                    res.setOption("Content-Format", "application/link-format");
+                    res.end("</test>;rt=wot.thing;ct=432");
+                } else if (parsedUrl.query === "rt=core.rd-lookup-res&ct=40") {
+                    res.setOption("Content-Format", "application/link-format");
+                    res.end("</rd-lookup/res>;rt=core.rd-lookup-res;ct=40");
+                } else if (parsedUrl.path === "/test") {
+                    res.setOption("Content-Format", "application/json");
+                    const td = { blah: "hi" };
+                    res.end(JSON.stringify(td));
+                }
+            });
+
+            const testNodes = [WoTDiscoveryNode, endTestNode];
+            helper.load(testNodes, flow, function () {
+                const n1 = helper.getNode("n1");
+                coapServer.listen(5683);
+                n1.emit("input", { payload: null });
             });
         });
 
