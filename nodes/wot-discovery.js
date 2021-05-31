@@ -1,7 +1,11 @@
 module.exports = function (RED) {
     "use strict";
+    const mqtt = require("mqtt");
     const coap = require("coap");
     const url = require("uri-js");
+
+    const mqttDiscoveryTopicBase = "wot/td";
+    const mqttDiscoveryTopic = mqttDiscoveryTopicBase + "/#";
 
     function WoTDiscoveryNode(config) {
         RED.nodes.createNode(this, config);
@@ -16,6 +20,10 @@ module.exports = function (RED) {
         const deleteExistingTDs = config.deleteExistingTDs != null ? config.deleteExistingTDs : true;
         const coreURI = config.coreURI;
         const tdURI = config.tdURI;
+
+        const useMqttDiscovery = config.useMqtt || false;
+        const mqttBrokerAddress = config.mqttBrokerAddress;
+        let mqttClient;
 
         const timeouts = {};
 
@@ -91,6 +99,10 @@ module.exports = function (RED) {
             coreRDAddresses.forEach(address => {
                 _performResourceDirectoryDiscovery(address);
             });
+
+            if (useMqttDiscovery) {
+                _performMqttDiscovery();
+            }
 
             function _performResourceDirectoryDiscovery(address) {
                 const reqOpts = url.parse(
@@ -294,6 +306,29 @@ module.exports = function (RED) {
                             }
                         });
                     }
+                });
+            }
+    
+            function _performMqttDiscovery() {
+                if (mqttClient) {
+                    mqttClient.end();
+                }
+    
+                if (mqttBrokerAddress) {
+                    mqttClient = mqtt.connect(mqttBrokerAddress);
+                } else {
+                    node.error("No MQTT broker address defined!");
+                    return;
+                }
+    
+                mqttClient.on('message', function (topic, message) {
+                    if (topic.startsWith(mqttDiscoveryTopicBase)) {
+                        _processThingDescriptionJSON(message.toString());
+                    }
+                });
+    
+                mqttClient.on('connect', function () {
+                    mqttClient.subscribe(mqttDiscoveryTopic);
                 });
             }
         });
