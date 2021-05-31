@@ -11,9 +11,6 @@
             coapIPv4Address: { value: "all" },
             useMqtt: { value: "" },
             mqttBrokerAddress: { value: "" },
-            useHttp: { value: true },
-            httpUseIPv6: { value: true },
-            httpUseIPv4: { value: false },
             timeoutRemoval: { value: true },
             removalTime: { value: 15 },
             msgOrContext: { value: "msg" },
@@ -22,6 +19,11 @@
             contextVar: { value: "" },
             contextVarType: { value: "flow" },
             deleteExistingTDs: { value: true },
+            coreURI: {value: false},
+            tdURI: {value: true},
+            useCoreRD: { value: false },
+            coreRDUseIPv6: { value: false },
+            coreRDUseIPv4: { value: false },
         },
         inputs: 1,
         outputs: 1,
@@ -80,9 +82,11 @@
                 if ($("#node-input-useCoap").is(":checked")) {
                     $("#node-input-coapUseIPv6-row").show();
                     $("#node-input-coapUseIPv4-row").show();
+                    $("#node-input-useCoreRD-row").show();
                 } else {
                     $("#node-input-coapUseIPv6-row").hide();
                     $("#node-input-coapUseIPv4-row").hide();
+                    $("#node-input-useCoreRD-row").hide();
                 }
             }
             if (this.useCoap) {
@@ -167,6 +171,30 @@
         </label>
     </div>
 
+    <div class="form-row" id="node-input-wellKnownURI-row">
+        <label for="node-input-wellKnownURI-row" style="width:auto"><i class="fa fa-tasks"></i> Well-known URIs</label>
+        <div>
+            <input
+            type="checkbox"
+            id="node-input-tdURI"
+            style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-tdURI" style="width: auto">
+                Use wot-thing-description
+            </label>
+        </div>
+        <div>
+            <input
+            type="checkbox"
+            id="node-input-coreURI"
+            style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-coreURI" style="width: auto">
+                Use <code>/.well-known/core</code>
+            </label>
+        </div>
+    </div>
+    <br>    
     <div class="form-row">
         <input
             type="checkbox"
@@ -218,6 +246,40 @@
                 </select>
             </div>
         </div>
+
+        <div id="node-input-useCoreRD-row" class="form-row hide">
+            <input
+                type="checkbox"
+                id="node-input-useCoreRD"
+                style="display: inline-block; width: auto; vertical-align: top;"
+            />
+            <label for="node-input-useCoreRD" style="width: auto">
+                Discover from CoRE Resource Directories
+            </label>
+    
+            <div id="node-input-coreRDUseIPv6-row">
+                <input
+                    type="checkbox"
+                    id="node-input-coreRDUseIPv6"
+                    style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-coreRDUseIPv6" style="width: auto">
+                    Use IPv6 multicast
+                </label>
+            </div>
+    
+            <div id="node-input-coreRDUseIPv4-row">
+                <input
+                    type="checkbox"
+                    id="node-input-coreRDUseIPv4"
+                    style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-coreRDUseIPv4" style="width: auto">
+                    Use IPv4 multicast
+                </label>
+            </div>
+        </div>
+
     </div>
 
     <div class="form-row">
@@ -241,44 +303,11 @@
             placeholder="mqtt://"
         />
     </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-useHttp"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-useHttp" style="width: auto">
-            Use HTTP for discovery
-        </label>
-    </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-httpUseIPv6"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-httpUseIPv6" style="width: auto">
-            Use IPv6 multicast
-        </label>
-    </div>
-
-    <div class="form-row">
-        <input
-            type="checkbox"
-            id="node-input-httpUseIPv4"
-            style="display: inline-block; width: auto; vertical-align: top;"
-        />
-        <label for="node-input-httpUseIPv4" style="width: auto">
-            Use IPv4 multicast
-        </label>
-    </div>
 </script>
 
 <script type="text/html" data-help-name="wot-discovery">
     <p>
-        A simple node that converts the message payloads into all lower-case
-        characters
+        Node that supports multiple methods for discovering WoT Thing Descriptions 
+        using CoAP.
     </p>
 </script>

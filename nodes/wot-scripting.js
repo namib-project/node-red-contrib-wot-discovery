@@ -1,7 +1,7 @@
 module.exports = function (RED) {
     "use strict";
     // Set the module dependencies
-    const { Servient, Helpers } = require("@node-wot/core");
+    const { Servient } = require("@node-wot/core");
     const { HttpClientFactory } = require('@node-wot/binding-http');
     const { CoapClientFactory } = require('@node-wot/binding-coap');
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
@@ -16,26 +16,26 @@ module.exports = function (RED) {
         subscribeEvent: "events",
     };
 
-    var thingCache = {};
+    const thingCache = {};
 
     function WoTScriptingNode(config) {
         RED.nodes.createNode(this, config);
-        var node = this;
+        const node = this;
 
         node.on('input', function (msg) {
 
             /* Parameters to the node are read here. Data from the input message is prefered over 
             the definition inside the Node-RED node. */
-            var operationType = msg.operationType || config.operationType;
-            var affordanceName = msg.affordanceName || config.affordanceName;
-            var type = msg.affordanceType || config.affordanceType;
-            var inputValue = msg.payload || config.inputValue;
-            var outputVar = msg.outputVar || config.outputVar || "payload";
-            var outputPayload = config.outputPayload;
-            var outputVarType = msg.outputVarType || config.outputVarType || "msg";
-            var cacheMinutes = config.cacheMinutes || 15;
+            const operationType = config.operationType || msg.operationType;
+            const affordanceName = config.affordanceName || msg.affordanceName;
+            const type = config.affordanceType || msg.affordanceType;
+            const inputValue = msg.payload || config.inputValue;
+            const outputVar = msg.outputVar || config.outputVar || "payload";
+            const outputPayload = config.outputPayload;
+            const outputVarType = msg.outputVarType || config.outputVarType || "msg";
+            const cacheMinutes = config.cacheMinutes || 15;
 
-            var affordanceType = operationsToAffordanceType[operationType];
+            const affordanceType = operationsToAffordanceType[operationType];
 
             if (!affordanceType) {
                 node.error("Illegal operation type defined!");
@@ -44,11 +44,11 @@ module.exports = function (RED) {
 
             /* msg.thingDescription shall include the thing description that can be gathered
             using the WoT Dicovery node provided with this module. */
-            var thingDescription = msg.thingDescription;
+            const thingDescription = msg.thingDescription;
 
-            var foundAffordances = [];
+            let foundAffordances = [];
 
-            var affordances = thingDescription[affordanceType];
+            const affordances = thingDescription[affordanceType];
 
             // Get a list of affordances the device provides
             const affordanceNames = Object.keys(affordances);
@@ -57,13 +57,13 @@ module.exports = function (RED) {
             run this to find the affordances by the given string and write it to
             foundAffordances */
             
-            let filterMode = config.filterMode;
+            const filterMode = config.filterMode;
 
             if (filterMode !== "affordanceName") {
-                affordanceNames.forEach((name, index) => {
+                affordanceNames.forEach((name) => {
                     let affordanceTypes = [];
-                    let affordance = affordances[name];
-                    let types = affordance["@type"];
+                    const affordance = affordances[name];
+                    const types = affordance["@type"];
                     // TODO: Refactor string to array conversion
                     if (typeof (types) === 'string') {
                         affordanceTypes.push(types);
@@ -85,7 +85,7 @@ module.exports = function (RED) {
                     }
                 // Quit with an error message if filter type has been set to an illegal value
                 } else if (filterMode !== "@type") {
-                    node.error(`Illegal filter mode "${filtermode}" defined!`);
+                    node.error(`Illegal filter mode "${filterMode}" defined!`);
                     return;
                 }
             }
@@ -98,7 +98,7 @@ module.exports = function (RED) {
                 }
             }
 
-            let identifier = _getTDIdentifier(thingDescription);
+            const identifier = _getTDIdentifier(thingDescription);
 
             /* Gather the affordances and use cached data if available. Delete the cache
             if the timeout specified has been reached */
@@ -170,7 +170,7 @@ module.exports = function (RED) {
          */
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType, outputPayload) {
 
-            let thingDescription = thing.getThingDescription();
+            const thingDescription = thing.getThingDescription();
             switch (operationType) {
                 case "readProperty":
                     thing.readProperty(affordanceName).then(output => {
@@ -191,9 +191,9 @@ module.exports = function (RED) {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
-                case "invokeAction":
+                case "invokeAction": {
                     let invokedAction;
-                    let constValue = _getConstValueInput(thingDescription, affordanceName);
+                    const constValue = _getConstValueInput(thingDescription, affordanceName);
                     if (constValue) {
                         invokedAction = thing.invokeAction(affordanceName, constValue);
                     }
@@ -206,6 +206,7 @@ module.exports = function (RED) {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
                     }).catch(error => node.error(error));
                     break;
+                }
                 case "subscribeEvent":
                     thing.subscribeEvent(affordanceName).then(output => {
                         _handleOutput(msg, output, outputVar, outputVarType, outputPayload);
@@ -226,7 +227,7 @@ module.exports = function (RED) {
          */
         function _getConstValueInput(thingDescription, affordanceName) {
             try {
-                let affordance = thingDescription.actions[affordanceName];
+                const affordance = thingDescription.actions[affordanceName];
                 return affordance.input.const;
             } catch (error) {
                 return null;
@@ -269,7 +270,7 @@ module.exports = function (RED) {
          * @return {Object} Identifier object providing the attributes id, base and title
          */
         function _getTDIdentifier(thingDescription) {
-            let identifier =
+            const identifier =
                 thingDescription.id ||
                 thingDescription.base ||
                 thingDescription.title;
@@ -284,17 +285,17 @@ module.exports = function (RED) {
          */
         function _getConsumedThing(thingDescription) {
             return new Promise((resolve, reject) => {
-                let servient = new Servient();
+                const servient = new Servient();
                 servient.addClientFactory(new HttpClientFactory(null));
                 servient.addClientFactory(new CoapClientFactory(null));
                 servient.addClientFactory(new MqttClientFactory(null));
 
                 servient.start().then((thingFactory) => {
-                    let consumedThing = thingFactory.consume(thingDescription);
+                    const consumedThing = thingFactory.consume(thingDescription);
                     resolve(consumedThing);
-                    let identifier = _getTDIdentifier(thingDescription);
+                    const identifier = _getTDIdentifier(thingDescription);
                     thingCache[identifier] = {servient: servient};
-                });
+                }).catch((err) => reject(err));
             });
         }
     }

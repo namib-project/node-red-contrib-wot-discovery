@@ -1,6 +1,5 @@
-var functionNode = require("@node-red/nodes/core/function/10-function.js");
-var WoTScriptingNode = require("../nodes/wot-scripting.js");
-var helper = require("node-red-node-test-helper");
+const WoTScriptingNode = require("../nodes/wot-scripting.js");
+const helper = require("node-red-node-test-helper");
 
 describe("WoTScriptingNode", function () {
     beforeEach(function (done) {
@@ -14,7 +13,7 @@ describe("WoTScriptingNode", function () {
     });
 
     it("should be loaded", function (done) {
-        var flow = [
+        const flow = [
             {
                 id: "n1",
                 type: "wot-scripting",
@@ -23,17 +22,17 @@ describe("WoTScriptingNode", function () {
             },
         ];
         //need to register nodes in order to use them
-        var testNodes = [WoTScriptingNode];
+        const testNodes = [WoTScriptingNode];
         helper.load(testNodes, flow, function () {
             done();
         });
     });
 
     it("should do something", function (done) {
-        var flow = [];
+        const flow = [];
 
         //need to register nodes in order to use them
-        var testNodes = [];
+        const testNodes = [];
         helper.load(testNodes, flow, function () {
             done();
         });
