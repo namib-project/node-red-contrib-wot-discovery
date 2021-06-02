@@ -8,6 +8,8 @@ node-red-contrib-wot-discovery
 Experimental Node-RED package for discovery in the Web of Things (WoT).
 It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that uses the WoT Scripting API (through the `node-wot` package) for triggering interaction affordances.
 
+![Screenshot of wot-discovery and wot-scripting](https://user-images.githubusercontent.com/12641361/120551508-66437480-c3f6-11eb-963f-36380b66e84f.png)
+
 ## `wot-discovery` Node
 
 The discovery node can obtain TDs from the local network (using CoAP) or from a MQTT broker and save them either in the context or in the original message object that was passed to the node.
