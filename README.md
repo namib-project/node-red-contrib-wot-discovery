@@ -8,4 +8,23 @@ node-red-contrib-wot-discovery
 Experimental Node-RED package for discovery in the Web of Things (WoT).
 It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that uses the WoT Scripting API (through the `node-wot` package) for triggering interaction affordances.
 
-So far, only discovery using CoAP is supported. However, more ways of discovering and interacting with Things are supposed to be added soon.
+## `wot-discovery` Node
+
+The discovery node can obtain TDs from the local network (using CoAP) or from a MQTT broker and save them either in the context or in the original message object that was passed to the node.
+
+When using CoAP, you can choose between a number of different methods for obtaining TDs, all of which use IP multicast (both IPv4 and IPv6).
+You can choose between the multicast addresses for all IPv4/IPv6 nodes or the respective address for "All CoAP Nodes".
+
+Supported methods for CoAP so far include:
+
+- Discovery from `/.well-known/wot-thing-discription`
+- Discovery using the CoRE Link Format and `/.well-known/core` (the correct content type and resource type has to be set in the list of links)
+- Discovery from CoRE Resource Directories. For this method, avaivable Resource Directories are discovered first which are then queried for links pointing to TDs
+
+For MQTT, WoT producers have to publish their TDs to a topic with the prefix `wot/td` which can then be queried by the discovery node.
+
+## `wot-scripting` Node
+
+The scripting node consumes TDs that are passed in inside a message object (in the field `thingDescription`).
+You can choose which kind of affordance type should be triggered and define a filter (either by affordance name or by the semantic `@type`).
+If an affordance returns an output, you can choose where this output should be saved (either in the message or the context) and which field should be used.
