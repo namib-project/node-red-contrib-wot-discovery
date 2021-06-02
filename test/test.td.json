@@ -3,7 +3,7 @@
     "id": "urn:dev:ops:32473-WoTLamp-1234",
     "title": "MyLampThing",
     "securityDefinitions": {
-        "none_sc": {"scheme": "none"}
+        "none_sc": {"scheme": "nosec"}
     },
     "security": ["none_sc"],
     "base": "coap://localhost",
