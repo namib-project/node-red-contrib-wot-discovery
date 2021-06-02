@@ -60,9 +60,9 @@ module.exports = function (RED) {
             const filterMode = config.filterMode;
 
             if (filterMode !== "affordanceName") {
-                affordanceNames.forEach((name) => {
+                affordanceNames.forEach((affordanceName) => {
                     let affordanceTypes = [];
-                    const affordance = affordances[name];
+                    const affordance = affordances[affordanceName];
                     const types = affordance["@type"];
                     // TODO: Refactor string to array conversion
                     if (typeof (types) === 'string') {
