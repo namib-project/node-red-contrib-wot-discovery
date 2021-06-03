@@ -6,7 +6,7 @@ node-red-contrib-wot-discovery
 [![Dev Dependency Status](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery/dev-status.png)](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery#dev-badge-embed)
 
 Experimental Node-RED package for discovery in the Web of Things (WoT).
-It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that uses the WoT Scripting API (through the `node-wot` package) for triggering interaction affordances.
+It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that serves as an interface to [`node-wot`](https://github.com/eclipse/thingweb.node-wot) for triggering interaction affordances.
 
 ![Screenshot of wot-discovery and wot-scripting](https://user-images.githubusercontent.com/12641361/120551508-66437480-c3f6-11eb-963f-36380b66e84f.png)
 
