@@ -1,13 +1,49 @@
+/**
+ * Node-RED node that consumes WoT Thing Descriptions.
+ * @module node-red-contrib-wot-discovery/wot-scripting
+ */
+
+
+/**
+ * 
+ * The definition of the wot-scripting node.
+ * 
+ * @param {*} RED 
+ */
 module.exports = function (RED) {
     "use strict";
-    // Set the module dependencies
+    
+    /**
+    * WoT core definitions
+    * @type {object}
+    * @property {HttpClientFactory}
+    */
     const { Servient } = require("@node-wot/core");
+   /**
+    * WoT HTTP Bindings
+    * @type {object}
+    * @property {HttpClientFactory}
+    */
     const { HttpClientFactory } = require('@node-wot/binding-http');
+   /**
+    * WoT CoAP Bindings
+    * @type {object}
+    * @property {CoapClientFactory}
+    */
     const { CoapClientFactory } = require('@node-wot/binding-coap');
+   /**
+    * WoT MQTT Bindings
+    * @type {object}
+    * @property {MqttClientFactory}
+    */
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
 
-    /** Set the possible affordance types that can be chosen from and defines 
-     * the kind of affordance */
+    /** 
+     * Maps the possible operation types to their kind of affordance
+     * 
+     * @type {Object.<string, string>}
+     * @constant
+     */
     const operationsToAffordanceType = {
         readProperty: "properties",
         writeProperty: "properties",
@@ -15,9 +51,19 @@ module.exports = function (RED) {
         invokeAction: "actions",
         subscribeEvent: "events",
     };
-
+    
+    /** 
+     * 
+     * @type {Object.<string, Servient>} 
+     */
     const thingCache = {};
 
+
+    /**
+     *
+     *
+     * @param {Object} config
+     */
     function WoTScriptingNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
@@ -155,6 +201,8 @@ module.exports = function (RED) {
             });
         }
 
+        
+
         // TODO: This signature has to be shortened
         /**
          * Actually perform the operation that has been chosen on the device
@@ -169,7 +217,7 @@ module.exports = function (RED) {
          * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
          */
         function performOperationOnThing(thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType, outputPayload) {
-
+            // TODO: This signature has to be shortened
             const thingDescription = thing.getThingDescription();
             switch (operationType) {
                 case "readProperty":
