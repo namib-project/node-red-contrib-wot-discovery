@@ -80,24 +80,76 @@
 
             function updateCoapOptions() {
                 if ($("#node-input-useCoap").is(":checked")) {
+                    $("#node-input-wellKnownURI-row").show();
                     $("#node-input-coapUseIPv6-row").show();
                     $("#node-input-coapUseIPv4-row").show();
                     $("#node-input-useCoreRD-row").show();
                 } else {
+                    $("#node-input-wellKnownURI-row").hide();
                     $("#node-input-coapUseIPv6-row").hide();
                     $("#node-input-coapUseIPv4-row").hide();
                     $("#node-input-useCoreRD-row").hide();
                 }
             }
+            function updateCoAPIPv4Option() {
+                if ($("#node-input-coapUseIPv4").is(":checked")) {
+                    $("#node-input-coapIPv4Address-row").show();
+                } else {
+                    $("#node-input-coapIPv4Address-row").hide();
+                }
+            }
+            function updateCoAPIPv6Option() {
+                if ($("#node-input-coapUseIPv6").is(":checked")) {
+                    $("#node-input-coapIPv6Address-row").show();
+                } else {
+                    $("#node-input-coapIPv6Address-row").hide();
+                }
+            }
+            function updateCoreRDOptions() {
+                if ($("#node-input-useCoreRD").is(":checked")) {
+                    $("#node-input-coreRDUseIPv6-row").show();
+                    $("#node-input-coreRDUseIPv4-row").show();
+                } else {
+                    $("#node-input-coreRDUseIPv6-row").hide();
+                    $("#node-input-coreRDUseIPv4-row").hide();
+                }
+            }
+            function updateMqttOptions() {
+                if ($("#node-input-useMqtt").is(":checked")) {
+                    $("#node-input-mqttBrokerAddress-row").show();
+                } else {
+                    $("#node-input-mqttBrokerAddress-row").hide();
+                }
+            }
+
+            $("#node-input-useCoap").on("click", function () {
+                updateCoapOptions();
+            });
+            $("#node-input-coapUseIPv4").on("click", function () {
+                updateCoAPIPv4Option();
+            });
+            $("#node-input-coapUseIPv6").on("click", function () {
+                updateCoAPIPv6Option();
+            });
+            $("#node-input-useCoreRD").on("click", function () {
+                updateCoreRDOptions();
+            });
+            $("#node-input-useMqtt").on("click", function () {
+                updateMqttOptions();
+            });
+
+            
+
             if (this.useCoap) {
                 $("#node-input-useCoap").prop("checked", true);
             } else {
                 $("#node-input-useCoap").prop("checked", false);
             }
             updateCoapOptions();
-            $("#node-input-useCoap").on("click", function () {
-                updateCoapOptions();
-            });
+            updateCoAPIPv4Option();
+            updateCoAPIPv6Option();
+            updateCoreRDOptions();
+            updateMqttOptions();
         },
     });
 </script>
@@ -171,30 +223,10 @@
         </label>
     </div>
 
-    <div class="form-row" id="node-input-wellKnownURI-row">
-        <label for="node-input-wellKnownURI-row" style="width:auto"><i class="fa fa-tasks"></i> Well-known URIs</label>
-        <div>
-            <input
-            type="checkbox"
-            id="node-input-tdURI"
-            style="display: inline-block; width: auto; vertical-align: top;"
-            />
-            <label for="node-input-tdURI" style="width: auto">
-                Use wot-thing-description
-            </label>
-        </div>
-        <div>
-            <input
-            type="checkbox"
-            id="node-input-coreURI"
-            style="display: inline-block; width: auto; vertical-align: top;"
-            />
-            <label for="node-input-coreURI" style="width: auto">
-                Use <code>/.well-known/core</code>
-            </label>
-        </div>
-    </div>
-    <br>    
+    <hr>
+
+    <h3>CoAP Discovery</h3>
+ 
     <div class="form-row">
         <input
             type="checkbox"
@@ -202,8 +234,33 @@
             style="display: inline-block; width: auto; vertical-align: top;"
         />
         <label for="node-input-useCoap" style="width: auto">
-            Use CoAP for discovery
+            Enable CoAP discovery
         </label>
+
+        <div class="form-row" id="node-input-wellKnownURI-row">
+            <h4>Discovery from well-known URIs</h4>
+            <!-- <label for="node-input-wellKnownURI-row" style="width:auto"><i class="fa fa-tasks"></i> Well-known URIs</label> -->
+            <div>
+                <input
+                type="checkbox"
+                id="node-input-tdURI"
+                style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-tdURI" style="width: auto">
+                    Discover from <code>/.well-known/wot-thing-description</code>
+                </label>
+            </div>
+            <div>
+                <input
+                type="checkbox"
+                id="node-input-coreURI"
+                style="display: inline-block; width: auto; vertical-align: top;"
+                />
+                <label for="node-input-coreURI" style="width: auto">
+                    Discover from <code>/.well-known/core</code>
+                </label>
+            </div>
+        </div>
 
         <div id="node-input-coapUseIPv6-row">
             <input
@@ -248,6 +305,7 @@
         </div>
 
         <div id="node-input-useCoreRD-row" class="form-row hide">
+            <h4>Discovery from CoRE Resource Directories</h4>
             <input
                 type="checkbox"
                 id="node-input-useCoreRD"
@@ -282,6 +340,10 @@
 
     </div>
 
+    <hr>
+
+    <h3>MQTT Discovery</h3>
+
     <div class="form-row">
         <input
             type="checkbox"
@@ -289,11 +351,11 @@
             style="display: inline-block; width: auto; vertical-align: top;"
         />
         <label for="node-input-useMqtt" style="width: auto">
-            Use MQTT for discovery
+            Enable MQTT discovery
         </label>
     </div>
 
-    <div class="form-row">
+    <div id="node-input-mqttBrokerAddress-row" class="form-row">
         <label for="node-input-mqttBrokerAddress"
             ><i class="fa fa-tag"></i> Broker address</label
         >
