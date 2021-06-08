@@ -52,6 +52,21 @@
     "mqtt"
   ],
   "author": "Jan Romann",
+  "contributors": [
+    {
+      "name": "Jens Bücker"
+    },
+    {
+      "name": "Cornelius Schulz-Trieglaff"
+    },
+    {
+      "name": "Maurice Springholz"
+    },
+    {
+      "name": "Jan Romann",
+      "email": "jan.romann@uni-bremen.de"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/JKRhb/node-red-contrib-wot-discovery/issues"
