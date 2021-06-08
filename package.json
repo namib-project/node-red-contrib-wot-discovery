@@ -1,5 +1,5 @@
 {
-  "name": "red-contrib-wot-discovery",
+  "name": "node-red-contrib-wot-discovery",
   "version": "1.0.0",
   "description": "An experimental Node-RED package for Discovery in the Web of Things (WoT).",
   "main": "index.js",
