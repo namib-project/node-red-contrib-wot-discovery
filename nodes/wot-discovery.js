@@ -253,7 +253,7 @@ module.exports = function (RED) {
              */
             function _resetContextVar() {
                 const contextVar = _getContextVar();
-                if (!contextVar.get(contextVarKey)) {
+                if (contextVar !== null) {
                     contextVar.set(contextVarKey, {});
                 }
             }
