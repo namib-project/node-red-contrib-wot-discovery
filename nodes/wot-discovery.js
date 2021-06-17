@@ -265,7 +265,7 @@ module.exports = function (RED) {
              */
             function _onResponse(res) {
                 res.on("data", (data) => {
-                    if (res.headers["Content-Format"] === "application/json") {
+                    if (res.headers["Content-Format"] === "application/td+json") {
                         _processThingDescriptionJSON(data);
                     }
                 });
