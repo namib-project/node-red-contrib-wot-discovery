@@ -93,7 +93,7 @@ describe("WoTDiscoveryNode", function () {
                         res.setOption("Content-Format", "application/link-format");
                         res.end('</test>;rt="wot.thing";ct=432');
                     } else if (path === "/test") {
-                        res.setOption("Content-Format", "application/json");
+                        res.setOption("Content-Format", "application/td+json");
                         const td = { blah: "hi" };
                         res.end(JSON.stringify(td));
                     }
@@ -165,7 +165,7 @@ describe("WoTDiscoveryNode", function () {
                         res.setOption("Content-Format", "application/link-format");
                         res.end("</rd-lookup/res>;rt=core.rd-lookup-res;ct=40");
                     } else if (parsedUrl.path === "/test") {
-                        res.setOption("Content-Format", "application/json");
+                        res.setOption("Content-Format", "application/td+json");
                         const td = { blah: "hi" };
                         res.end(JSON.stringify(td));
                     }
