@@ -15,13 +15,13 @@ It provides a `wot-discovery` node that can be used for discovering and storing 
 The discovery node can obtain TDs from the local network (using CoAP) or from a MQTT broker and save them either in the context or in the original message object that was passed to the node.
 
 When using CoAP, you can choose between a number of different methods for obtaining TDs, all of which use IP multicast (both IPv4 and IPv6).
-You can choose between the multicast addresses for all IPv4/IPv6 nodes or the respective address for "All CoAP Nodes".
+You can choose between the multicast addresses for all IPv4/IPv6 nodes or the respective addresses for "All CoAP Nodes".
 
 Supported methods for CoAP so far include:
 
-- Discovery from `/.well-known/wot-thing-discription`
-- Discovery using the CoRE Link Format and `/.well-known/core` (the correct content type and resource type has to be set in the list of links)
-- Discovery from CoRE Resource Directories. For this method, avaivable Resource Directories are discovered first which are then queried for links pointing to TDs
+- Discovery from `/.well-known/wot-thing-discription`.
+- Discovery using the CoRE Link Format and `/.well-known/core` (the correct content type and resource type has to be set in the list of links).
+- Discovery from CoRE Resource Directories. For this method, available Resource Directories are discovered first which are then queried for links pointing to TDs.
 
 For MQTT, WoT producers have to publish their TDs to a topic with the prefix `wot/td` which can then be queried by the discovery node.
 
