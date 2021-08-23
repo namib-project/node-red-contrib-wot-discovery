@@ -50,7 +50,7 @@
             $("#node-input-inputValue").typedInput({
                 type:"str",
                 types:["str","num","bool", "json"],
-                typeField: "#node-input-inputValue-type"
+                typeField: "#node-input-inputValueType"
             });
 
             $("#node-input-operationType").on("change", function() {
@@ -129,7 +129,7 @@
     <div class="form-row node-input-inputValue-row hide">
         <label for="node-input-inputValue"><i class="fa fa-tag"></i> Input value</label>
         <input type="text" id="node-input-inputValue">
-        <input type="hidden" id="node-input-inputValue-type">
+        <input type="hidden" id="node-input-inputValueType">
     </div>
 
     <!-- TODO: Improve form for cache timer -->
