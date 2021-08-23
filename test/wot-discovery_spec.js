@@ -245,6 +245,6 @@ describe("WoTDiscoveryNode", function () {
                     mqttClient.publish("wot/td/smartlight", JSON.stringify({ blah: "hi" }));
                 }, 500);
             });
-        });
+        }).timeout(5000);
     });
 });
