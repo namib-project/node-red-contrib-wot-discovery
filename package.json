@@ -77,7 +77,7 @@
     "@node-wot/binding-http": "^0.7.6",
     "@node-wot/binding-mqtt": "^0.7.6",
     "@node-wot/core": "^0.7.6",
-    "coap": "github:mcollina/node-coap"
+    "coap": "^0.25.0"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
