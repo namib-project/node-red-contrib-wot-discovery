@@ -104,7 +104,7 @@ describe("WoTScriptingNode", function () {
 
         coapServer.on('request', function (req, res) {
             const path = url.parse(req.url).path;
-            
+
             req.method.should.eql("POST");
             path.should.eql("/toggle");
             res.setOption("Content-Format", "application/json");

@@ -5,10 +5,10 @@
 
 
 /**
- * 
+ *
  * The definition of the wot-discovery node.
- * 
- * @param {*} RED 
+ *
+ * @param {*} RED
  */
 module.exports = function (RED) {
     "use strict";
@@ -25,7 +25,7 @@ module.exports = function (RED) {
      * @param {*} config
      */
     function WoTDiscoveryNode(config) {
-        
+
         RED.nodes.createNode(this, config);
         const node = this;
         const coapAddresses = [];
@@ -63,7 +63,7 @@ module.exports = function (RED) {
         }
 
        /**
-        * 
+        *
         * @param {*} config whether the node should use coap for discovery.
         * @return {*} list of multicast addresses to use for discovery.
         */
@@ -198,7 +198,7 @@ module.exports = function (RED) {
             /**
              *
              *  Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
-             * 
+             *
              * @param {*} thingDescriptionJSON the Thing Description in JSON
              */
             function _processThingDescriptionJSON(thingDescriptionJSON) {
@@ -216,7 +216,7 @@ module.exports = function (RED) {
              *  Stores the given Thing Description in the given context or sends it as message.
              *
              * @param {*} thingDescription
-             * @return {*} 
+             * @return {*}
              */
             function _processThingDescription(thingDescription) {
                 if (msgOrContext === "msg" || msgOrContext === "both") {
@@ -275,7 +275,7 @@ module.exports = function (RED) {
              *
              *
              * @param {*} thingDescription
-             * @return {*} 
+             * @return {*}
              */
             function _getTDIdentifier(thingDescription) {
                 const identifier = thingDescription.id || thingDescription.base || thingDescription.title;
@@ -355,7 +355,7 @@ module.exports = function (RED) {
                     if ("uri" in linkObject && ! errorOccured) {
                         results.push(linkObject);
                     }
-                    
+
                     return results;
                 }, []);
             }
@@ -383,25 +383,25 @@ module.exports = function (RED) {
                     }
                 });
             }
-    
+
             function _performMqttDiscovery() {
                 if (mqttClient) {
                     mqttClient.end();
                 }
-    
+
                 if (mqttBrokerAddress) {
                     mqttClient = mqtt.connect(mqttBrokerAddress);
                 } else {
                     node.error("No MQTT broker address defined!");
                     return;
                 }
-    
+
                 mqttClient.on('message', function (topic, message) {
                     if (topic.startsWith(mqttDiscoveryTopicBase)) {
                         _processThingDescriptionJSON(message.toString());
                     }
                 });
-    
+
                 mqttClient.on('connect', function () {
                     mqttClient.subscribe(mqttDiscoveryTopic);
                 });

@@ -5,14 +5,14 @@
 
 
 /**
- * 
+ *
  * The definition of the wot-scripting node.
- * 
- * @param {*} RED 
+ *
+ * @param {*} RED
  */
 module.exports = function (RED) {
     "use strict";
-    
+
     /**
     * WoT core definitions
     * @type {object}
@@ -38,9 +38,9 @@ module.exports = function (RED) {
     */
     const { MqttClientFactory } = require('@node-wot/binding-mqtt');
 
-    /** 
+    /**
      * Maps the possible operation types to their kind of affordance
-     * 
+     *
      * @type {Object.<string, string>}
      * @constant
      */
@@ -51,10 +51,10 @@ module.exports = function (RED) {
         invokeAction: "actions",
         subscribeEvent: "events",
     };
-    
-    /** 
-     * 
-     * @type {Object.<string, Servient>} 
+
+    /**
+     *
+     * @type {Object.<string, Servient>}
      */
     const thingCache = {};
 
@@ -70,12 +70,13 @@ module.exports = function (RED) {
 
         node.on('input', function (msg) {
 
-            /* Parameters to the node are read here. Data from the input message is prefered over 
+            /* Parameters to the node are read here. Data from the input message is prefered over
             the definition inside the Node-RED node. */
             const operationType = config.operationType || msg.operationType;
             const affordanceName = config.affordanceName || msg.affordanceName;
             const type = config.affordanceType || msg.affordanceType;
-            const inputValue = msg.payload || config.inputValue;
+            // const inputValue = !!msg.payload ? msg.payload : config.inputValue;
+            const inputValue = !!msg.payload || !{} || ![] ? msg.payload : config.inputValue;
             const outputVar = msg.outputVar || config.outputVar || "payload";
             const outputPayload = config.outputPayload;
             const outputVarType = msg.outputVarType || config.outputVarType || "msg";
@@ -102,7 +103,7 @@ module.exports = function (RED) {
             /* If not the name of the affordance, that shall be fetched, is given
             run this to find the affordances by the given string and write it to
             foundAffordances */
-            
+
             const filterMode = config.filterMode;
 
             if (filterMode !== "affordanceName") {
@@ -176,8 +177,8 @@ module.exports = function (RED) {
 
         /**
          * Serially perform multiple operations on a device
-         * 
-         * @param {Object} thing The recent thing description 
+         *
+         * @param {Object} thing The recent thing description
          * @param {String} operationType The operation that shall be performed
          * @param {String} affordanceName The name of the affordance the operation shall be performed on
          * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
@@ -201,13 +202,13 @@ module.exports = function (RED) {
             });
         }
 
-        
+
 
         // TODO: This signature has to be shortened
         /**
          * Actually perform the operation that has been chosen on the device
          *
-         * @param {Object} thing The recent thing description 
+         * @param {Object} thing The recent thing description
          * @param {String} operationType The operation that shall be performed
          * @param {String} affordanceName The name of the affordance the operation shall be performed on
          * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
@@ -286,7 +287,7 @@ module.exports = function (RED) {
          * Handle the output of the device
          *
          * @param {Object} msg The message this node will send
-         * @param {Object} output The output received by the device 
+         * @param {Object} output The output received by the device
          * @param {String} outputVar The attribute's name the output is going to be saved
          * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
          * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
