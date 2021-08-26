@@ -6,7 +6,8 @@
   "node-red": {
     "nodes": {
       "wot-discovery": "nodes/wot-discovery.js",
-      "wot-scripting": "nodes/wot-scripting.js"
+      "wot-scripting": "nodes/wot-scripting.js",
+      "wot-fetch": "nodes/wot-fetch.js"
     }
   },
   "scripts": {
@@ -32,7 +33,7 @@
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-      "ecmaVersion": 6
+      "ecmaVersion": 8
     },
     "rules": {
       "keyword-spacing": 2,

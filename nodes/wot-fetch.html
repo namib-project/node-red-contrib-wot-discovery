@@ -1,0 +1,50 @@
+<script type="text/javascript">
+    RED.nodes.registerType("wot-fetch", {
+        category: "Web of Things",
+        color: 'rgb(95, 162, 162)',
+        defaults: {
+            name: { value: "" },
+            tdUrl: { value: "" },
+            outputVar: { value: "thingDescription" },
+            outputVarType: { value: "msg" },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "file.png",
+        label: function () {
+            return this.name || "wot-fetch";
+        },
+        oneditprepare: function () {
+            $("#node-input-outputVar").typedInput({
+                type: "msg",
+                types: ["msg", "flow", "global"],
+                typeField: "#node-input-outputVarType",
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="wot-fetch">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="wot-fetch" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-tdUrl"><i class="fa fa-file"></i> TD URL</label>
+        <input type="text" id="node-input-tdUrl" placeholder="http://example.org/.well-known/wot-thing-description" />
+    </div>
+
+    <div class="form-row node-input-outputVar-row">
+        <label for="node-input-outputVar"><i class="fa fa-tag"></i> Save TD to</label>
+        <input type="text" id="node-input-outputVar" placeholder="thingDescription"/>
+        <input type="hidden" id="node-input-outputVarType" />
+    </div>
+</script>
+
+<script type="text/html" data-help-name="wot-fetch">
+    <p>
+        Node that fetches a TD from a URL using HTTP(S) or CoAP(S).
+        This URL can either be defined within the node's configuration
+        or via a <code>msg</code> property.
+    </p>
+</script>
