@@ -16,19 +16,21 @@ module.exports = function (RED) {
     /**
     * WoT core definitions
     * @type {object}
-    * @property {HttpClientFactory}
+    * @property {Servient}
     */
     const { Servient } = require("@node-wot/core");
    /**
     * WoT HTTP Bindings
     * @type {object}
-    * @property {HttpClientFactory, HttpsClientFactory}
+    * @property {HttpClientFactory}
+    * @property {HttpsClientFactory}
     */
     const { HttpClientFactory, HttpsClientFactory } = require('@node-wot/binding-http');
    /**
     * WoT CoAP Bindings
     * @type {object}
-    * @property {CoapClientFactory, CoapsClientFactory}
+    * @property {CoapClientFactory}
+    * @property {CoapsClientFactory}
     */
     const { CoapClientFactory, CoapsClientFactory } = require('@node-wot/binding-coap');
    /**
