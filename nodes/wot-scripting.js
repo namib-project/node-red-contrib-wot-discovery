@@ -22,15 +22,15 @@ module.exports = function (RED) {
    /**
     * WoT HTTP Bindings
     * @type {object}
-    * @property {HttpClientFactory}
+    * @property {HttpClientFactory, HttpsClientFactory}
     */
-    const { HttpClientFactory } = require('@node-wot/binding-http');
+    const { HttpClientFactory, HttpsClientFactory } = require('@node-wot/binding-http');
    /**
     * WoT CoAP Bindings
     * @type {object}
-    * @property {CoapClientFactory}
+    * @property {CoapClientFactory, CoapsClientFactory}
     */
-    const { CoapClientFactory } = require('@node-wot/binding-coap');
+    const { CoapClientFactory, CoapsClientFactory } = require('@node-wot/binding-coap');
    /**
     * WoT MQTT Bindings
     * @type {object}
@@ -336,7 +336,9 @@ module.exports = function (RED) {
             return new Promise((resolve, reject) => {
                 const servient = new Servient();
                 servient.addClientFactory(new HttpClientFactory(null));
+                servient.addClientFactory(new HttpsClientFactory(null));
                 servient.addClientFactory(new CoapClientFactory(null));
+                servient.addClientFactory(new CoapsClientFactory(null));
                 servient.addClientFactory(new MqttClientFactory(null));
 
                 servient.start().then((thingFactory) => {
