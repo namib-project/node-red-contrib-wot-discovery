@@ -1,6 +1,6 @@
 /**
  * Node-RED node that fetches WoT Thing Descriptions using CoAP(S) or HTTP(S).
- * @module node-red-contrib-wot-discovery/wot-discovery
+ * @module node-red-contrib-wot-discovery/wot-fetch
  */
 
 module.exports = function (RED) {
