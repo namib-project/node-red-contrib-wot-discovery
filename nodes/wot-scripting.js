@@ -77,8 +77,8 @@ module.exports = function (RED) {
             const operationType = config.operationType || msg.operationType;
             const affordanceName = config.affordanceName || msg.affordanceName;
             const type = config.affordanceType || msg.affordanceType;
-            // const inputValue = !!msg.payload ? msg.payload : config.inputValue;
-            const inputValue = !!msg.payload || !{} || ![] ? msg.payload : config.inputValue;
+            const rawInputValue = (!!config.inputValue && Object.keys(config.inputValue).length > 0) ? config.inputValue : msg.payload;
+            const inputValue = config.inputValueType == "json" ? JSON.parse(rawInputValue): rawInputValue;
             const outputVar = msg.outputVar || config.outputVar || "payload";
             const outputPayload = config.outputPayload;
             const outputVarType = msg.outputVarType || config.outputVarType || "msg";
