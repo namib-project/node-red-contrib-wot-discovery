@@ -33,8 +33,8 @@ module.exports = function (RED) {
 
             node.status({
                 fill: "blue",
-                shape: "ring",
-                text: `Fetching TD from ${tdUrl} ...`,
+                shape: "dot",
+                text: `Fetching TD from ${tdUrl}`,
             });
 
             WoTHelpers.fetch(tdUrl)
