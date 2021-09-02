@@ -106,9 +106,7 @@ module.exports = function (RED) {
         }
 
         function _setStatusTimeout() {
-            if (clearingTimeout) {
-                clearTimeout(clearingTimeout);
-            }
+            clearTimeout(clearingTimeout);
 
             clearingTimeout = setTimeout(() => {
                 node.status({});
