@@ -30,6 +30,8 @@ module.exports = function (RED) {
         let clearingTimeout;
         const tdCache = {};
 
+        node.status({});
+
         node.on("input", function (msg) {
             const tdUrl = msg.tdUrl || config.tdUrl;
             const outputVar =
