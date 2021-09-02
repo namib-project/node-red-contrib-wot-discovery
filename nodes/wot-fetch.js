@@ -14,7 +14,6 @@ module.exports = function (RED) {
         CoapsClientFactory,
     } = require("@node-wot/binding-coap");
 
-    let clearingTimeout;
     const statusClearingDelay = 5000;
 
     const servient = new Servient();
@@ -27,6 +26,7 @@ module.exports = function (RED) {
     function WoTFetchNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
+        let clearingTimeout;
         node.on("input", function (msg) {
             const tdUrl = msg.tdUrl || config.tdUrl;
             const outputVar =
