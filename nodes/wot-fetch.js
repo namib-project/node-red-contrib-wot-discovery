@@ -91,9 +91,7 @@ module.exports = function (RED) {
                         node.context()[outputVarType].set(outputVar, td);
                         break;
                     default:
-                        throw new Error(
-                            "Wrong output variable type defined."
-                        );
+                        throw new Error("Wrong output variable type defined.");
                 }
             }
         });
