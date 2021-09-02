@@ -14,6 +14,9 @@ module.exports = function (RED) {
         CoapsClientFactory,
     } = require("@node-wot/binding-coap");
 
+    let clearingTimeout;
+    const statusClearingDelay = 5000;
+
     const servient = new Servient();
     servient.addClientFactory(new HttpClientFactory(null));
     servient.addClientFactory(new HttpsClientFactory(null));
@@ -53,7 +56,7 @@ module.exports = function (RED) {
                                 "Wrong output variable type defined."
                             );
                     }
-
+                    _setStatusTimeout();
                     node.status({
                         fill: "green",
                         shape: "ring",
@@ -62,6 +65,7 @@ module.exports = function (RED) {
                 })
                 .catch((err) => {
                     node.error("Fetch error:", err);
+                    _setStatusTimeout();
                     node.status({
                         fill: "red",
                         shape: "ring",
@@ -69,6 +73,16 @@ module.exports = function (RED) {
                     });
                 });
         });
+
+        function _setStatusTimeout() {
+            if (clearingTimeout) {
+                clearTimeout(clearingTimeout);
+            }
+
+            clearingTimeout = setTimeout(() => {
+                node.status({});
+            }, statusClearingDelay);
+        }
     }
     RED.nodes.registerType("wot-fetch", WoTFetchNode);
 };
