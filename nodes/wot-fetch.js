@@ -19,11 +19,12 @@ module.exports = function (RED) {
 
     const wotHelper = _createWoTHelper();
 
+    const tdCache = {};
+
     function WoTFetchNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         let clearingTimeout;
-        const tdCache = {};
 
         node.status({});
 
