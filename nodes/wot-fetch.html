@@ -7,6 +7,8 @@
             tdUrl: { value: "" },
             outputVar: { value: "thingDescription" },
             outputVarType: { value: "msg" },
+            cacheTds: { value: true },
+            cacheMinutes: { value: 15 },
         },
         inputs: 1,
         outputs: 1,
@@ -19,6 +21,21 @@
                 type: "msg",
                 types: ["msg", "flow", "global"],
                 typeField: "#node-input-outputVarType",
+            });
+
+            $("#node-input-cacheTds").prop("checked", this.cacheTds);
+
+            function updateConfigRow(checkBoxId, configRowId) {
+                if ($(checkBoxId).is(":checked")) {
+                    $(configRowId).show();
+                } else {
+                    $(configRowId).hide();
+                }
+            }
+
+            updateConfigRow("#node-input-cacheTds", "#node-input-cacheMinutes-row");
+            $("#node-input-cacheTds").on("click", function () {
+                updateConfigRow("#node-input-cacheTds", "#node-input-cacheMinutes-row");
             });
         }
     });
@@ -38,6 +55,16 @@
         <label for="node-input-outputVar"><i class="fa fa-tag"></i> Save TD to</label>
         <input type="text" id="node-input-outputVar" placeholder="thingDescription"/>
         <input type="hidden" id="node-input-outputVarType" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-cacheTds"><i class="fa fa-file"></i> Cache TDs?</label>
+        <input type="checkbox" id="node-input-cacheTds"  />
+    </div>
+
+    <div class="form-row" id="node-input-cacheMinutes-row">
+        <label for="node-input-cacheMinutes"><i class="fa fa-file"></i> Minutes to cache TDs:</label>
+        <input type="number" id="node-input-cacheMinutes" min="0" placeholder="15"/>
     </div>
 </script>
 

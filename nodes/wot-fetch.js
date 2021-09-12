@@ -15,7 +15,7 @@ module.exports = function (RED) {
     } = require("@node-wot/binding-coap");
 
     const statusClearingDelay = 5000;
-    const tdCacheTime = 15 * 60 * 1000; // TODO: Should be configurable
+    const defaultCacheMinutes = 15;
 
     const wotHelper = _createWoTHelper();
 
@@ -33,8 +33,11 @@ module.exports = function (RED) {
                 msg.outputVar || config.outputVar || "thingDescription";
             const outputVarType =
                 msg.outputVarType || config.outputVarType || "msg";
+            const cacheTds = config.cacheTds;
+            const cacheMinutes = msg.cacheMinutes || config.cacheMinutes || defaultCacheMinutes;
+            const tdCacheTime = cacheMinutes * 60 * 1000;
 
-            if (tdCache[tdUrl] != undefined) {
+            if (cacheTds && tdCache[tdUrl] != undefined) {
                 _setStatusTimeout();
                 node.status({
                     fill: "green",
@@ -56,7 +59,9 @@ module.exports = function (RED) {
                 wotHelper.fetch(tdUrl)
                     .then(async (td) => {
                         _handleTd(td);
-                        _cacheTd(tdUrl, td);
+                        if (cacheTds) {
+                            _cacheTd(tdUrl, td, tdCacheTime);
+                        }
                         _setStatusTimeout();
                         node.status({
                             fill: "green",
@@ -91,7 +96,7 @@ module.exports = function (RED) {
             }
         });
 
-        function _cacheTd(tdUrl, td) {
+        function _cacheTd(tdUrl, td, tdCacheTime) {
             tdCache[tdUrl] = td;
             setTimeout(() => {
                 delete tdCache[tdUrl];
