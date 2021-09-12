@@ -7,8 +7,14 @@ node-red-contrib-wot-discovery
 
 Experimental Node-RED package for discovery in the Web of Things (WoT).
 It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that serves as an interface to [`node-wot`](https://github.com/eclipse/thingweb.node-wot) for triggering interaction affordances.
+As a latest addition, a `wot-fetch` node provides a way to retrieve TDs directly from URLs using HTTP(S) or CoAP(S).
 
-![Screenshot of wot-discovery and wot-scripting](https://user-images.githubusercontent.com/12641361/120551508-66437480-c3f6-11eb-963f-36380b66e84f.png)
+![Screenshot of wot-fetch, wot-discovery, wot-scripting nodes](https://user-images.githubusercontent.com/12641361/132991809-14778a9a-08a6-4762-aafd-4a5cbc5c25a6.png)
+
+## `wot-fetch` Node
+
+The fetch node can retrieve TDs from URLs which can either be specified in the node itself or as a message property (using the field `msg.tdUrl`).
+It supports the URL schemes `http(s)` and `coap(s)`.
 
 ## `wot-discovery` Node
 
