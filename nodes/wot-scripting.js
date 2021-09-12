@@ -70,7 +70,15 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         const node = this;
 
-        node.on('input', function (msg) {
+        const servient = _createWoTServient();
+
+        servient.start().then(thingFactory => {
+            node.on('input', function (msg) {
+                _handleNodeInput(node, msg, thingFactory);
+            });
+        }).catch(error => node.error(`wot-scriping: ${error.message}`));
+
+        function _handleNodeInput(node, msg, thingFactory) {
 
             /* Parameters to the node are read here. Data from the input message is prefered over
             the definition inside the Node-RED node. */
@@ -153,18 +161,17 @@ module.exports = function (RED) {
             if the timeout specified has been reached */
             try {
                 if (thingCache[identifier]) {
-                    performOperationsOnThing(foundAffordances, thingCache[identifier].td, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
+                    performOperationsOnThing(foundAffordances, thingCache[identifier].thing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
                     if (cacheMinutes) {
                         thingCache[identifier].timer.refresh();
                     }
                 } else {
-                    _getConsumedThing(thingDescription).then(
+                    thingFactory.consume(thingDescription).then(
                         (consumedThing) => {
-                            thingCache[identifier].td = consumedThing;
+                            thingCache[identifier] = {thing: consumedThing};
                             performOperationsOnThing(foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload);
                             if (cacheMinutes) {
                                 thingCache[identifier].timer = setTimeout(() => {
-                                    thingCache[identifier].servient.shutdown();
                                     delete thingCache[identifier];
                                 }, cacheMinutes * 60 * 1000);
                             }
@@ -175,7 +182,7 @@ module.exports = function (RED) {
                 console.log(error);
                 node.error("Error:", error.message);
             }
-        });
+        }
 
         /**
          * Serially perform multiple operations on a device
@@ -328,28 +335,15 @@ module.exports = function (RED) {
             return identifier;
         }
 
-        /**
-         * Get the thing description of a device and save the data in the cache
-         *
-         * @param {Object} thingDescription Object as provided by the WoT Discovery node
-         * @return {Object} Object as provided by the WoT Discovery node
-         */
-        function _getConsumedThing(thingDescription) {
-            return new Promise((resolve, reject) => {
-                const servient = new Servient();
-                servient.addClientFactory(new HttpClientFactory(null));
-                servient.addClientFactory(new HttpsClientFactory(null));
-                servient.addClientFactory(new CoapClientFactory(null));
-                servient.addClientFactory(new CoapsClientFactory(null));
-                servient.addClientFactory(new MqttClientFactory(null));
+        function _createWoTServient() {
+            const servient = new Servient();
+            servient.addClientFactory(new HttpClientFactory(null));
+            servient.addClientFactory(new HttpsClientFactory(null));
+            servient.addClientFactory(new CoapClientFactory(null));
+            servient.addClientFactory(new CoapsClientFactory(null));
+            servient.addClientFactory(new MqttClientFactory(null));
 
-                servient.start().then((thingFactory) => {
-                    const consumedThing = thingFactory.consume(thingDescription);
-                    resolve(consumedThing);
-                    const identifier = _getTDIdentifier(thingDescription);
-                    thingCache[identifier] = {servient: servient};
-                }).catch((err) => reject(err));
-            });
+            return servient;
         }
     }
     RED.nodes.registerType("wot-scripting", WoTScriptingNode);
