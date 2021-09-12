@@ -17,12 +17,7 @@ module.exports = function (RED) {
     const statusClearingDelay = 5000;
     const tdCacheTime = 15 * 60 * 1000; // TODO: Should be configurable
 
-    const servient = new Servient();
-    servient.addClientFactory(new HttpClientFactory(null));
-    servient.addClientFactory(new HttpsClientFactory(null));
-    servient.addClientFactory(new CoapClientFactory(null));
-    servient.addClientFactory(new CoapsClientFactory(null));
-    const WoTHelpers = new Helpers(servient);
+    const wotHelper = _createWoTHelper();
 
     function WoTFetchNode(config) {
         RED.nodes.createNode(this, config);
@@ -58,7 +53,7 @@ module.exports = function (RED) {
                     text: `Fetching TD from ${tdUrl}`,
                 });
 
-                WoTHelpers.fetch(tdUrl)
+                wotHelper.fetch(tdUrl)
                     .then(async (td) => {
                         _handleTd(td);
                         _cacheTd(tdUrl, td);
@@ -111,5 +106,15 @@ module.exports = function (RED) {
             }, statusClearingDelay);
         }
     }
+
+    function _createWoTHelper() {
+        const servient = new Servient();
+        servient.addClientFactory(new HttpClientFactory(null));
+        servient.addClientFactory(new HttpsClientFactory(null));
+        servient.addClientFactory(new CoapClientFactory(null));
+        servient.addClientFactory(new CoapsClientFactory(null));
+        return new Helpers(servient);
+    }
+
     RED.nodes.registerType("wot-fetch", WoTFetchNode);
 };
