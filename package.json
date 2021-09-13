@@ -13,8 +13,8 @@
   "scripts": {
     "test": "nyc mocha --exit",
     "coverage": "nyc report --reporter=lcov --reporter=text-summary",
-    "lint": "eslint \"**/*.js\"",
-    "lint:fix": "eslint \"**/*.js\" --fix"
+    "lint": "standard  --env mocha",
+    "lint:fix": "standard --fix  --env mocha"
   },
   "mocha": {
     "globals": [
@@ -23,24 +23,6 @@
     "ignoreLeaks": false,
     "ui": "bdd",
     "reporter": "spec"
-  },
-  "eslintConfig": {
-    "env": {
-      "commonjs": true,
-      "node": true,
-      "mocha": true,
-      "es6": true
-    },
-    "extends": "eslint:recommended",
-    "parserOptions": {
-      "ecmaVersion": 8
-    },
-    "rules": {
-      "keyword-spacing": 2,
-      "semi": 2,
-      "prefer-const": 2,
-      "no-var": 2
-    }
   },
   "repository": {
     "type": "git",
@@ -82,10 +64,10 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
-    "eslint": "^7.26.0",
     "mocha": "^9.1.0",
     "node-red": "^2.0.5",
     "node-red-node-test-helper": "^0.2.5",
-    "nyc": "^15.1.0"
+    "nyc": "^15.1.0",
+    "standard": "^16.0.3"
   }
 }

@@ -1,4 +1,4 @@
-name: Lint
+name: StandardJS Linter
 
 on:
   push:
@@ -8,19 +8,31 @@ on:
 
 jobs:
   eslint:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        os: [ubuntu-latest]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - run: |
-          git config --global url."https://${{ secrets.PAT }}@github.com/".insteadOf ssh://git@github.com/
-          npm ci
-      - uses: sibiraj-s/action-eslint@v1
-        with:
-          # eslintArgs: '--ignore-path=.gitignore --quiet'
-          # extensions: 'js,jsx,ts,tsx'
-          annotations: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v2
+
+    # Caches NPM and the node_modules folder for faster builds
+    - name: Cache node modules
+      uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Use linter
+      run: npm run lint

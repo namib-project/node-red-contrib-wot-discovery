@@ -2,6 +2,7 @@ node-red-contrib-wot-discovery
 =====================
 ![Build Status](https://github.com/JKRhb/node-red-contrib-wot-discovery/workflows/Build%20Status/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/JKRhb/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/JKRhb/node-red-contrib-wot-discovery?branch=main)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![Dependency Status](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery.png)](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery)
 [![Dev Dependency Status](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery/dev-status.png)](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery#dev-badge-embed)
 
