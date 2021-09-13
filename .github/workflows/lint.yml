@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  eslint:
+  lint:
     runs-on: ${{ matrix.os }}
 
     strategy:
