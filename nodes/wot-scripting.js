@@ -7,7 +7,7 @@
  *
  * The definition of the wot-scripting node.
  *
- * @param {*} RED
+ * @param {*} RED The Node-RED object.
  */
 module.exports = function (RED) {
   'use strict'
