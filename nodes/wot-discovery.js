@@ -26,8 +26,8 @@ module.exports = function (RED) {
   function WoTDiscoveryNode (config) {
     RED.nodes.createNode(this, config)
     const node = this
-    const coapAddresses = []
-    const coreRDAddresses = []
+    const coapAddresses = _getCoapAddresses(config)
+    const coreRDAddresses = _getcoreRDAddresses(config)
 
     const contextVarKey = config.contextVar || 'thingDescriptions'
     const contextVarType = config.contextVarType
@@ -45,14 +45,6 @@ module.exports = function (RED) {
 
     // TODO: Add Implementations for MQTT
 
-    if (config.useCoap) {
-      _getCoapAddresses()
-
-      if (config.useCoreRD) {
-        _getcoreRDAddresses()
-      }
-    }
-
     if (msgOrContext === 'context' || msgOrContext === 'both') {
       const contextVar = _getContextVar()
       if (!contextVar.get(contextVarKey)) {
@@ -65,8 +57,11 @@ module.exports = function (RED) {
         * @param {*} config whether the node should use coap for discovery.
         * @return {*} list of multicast addresses to use for discovery.
         */
-    function _getCoapAddresses () {
-      if (config.coapUseIPv6) {
+    function _getCoapAddresses (config) {
+      const coapAddresses = []
+      const useCoap = config.useCoap
+
+      if (useCoap && config.coapUseIPv6) {
         if (config.coapIPv6Address === 'all') {
           coapAddresses.push('[ff02::1]')
         } else if (config.coapIPv6Address === 'coapOnly') {
@@ -74,23 +69,30 @@ module.exports = function (RED) {
         }
       }
 
-      if (config.coapUseIPv4) {
+      if (useCoap && config.coapUseIPv4) {
         if (config.coapIPv4Address === 'all') {
           coapAddresses.push('224.0.0.1')
         } else if (config.coapIPv4Address === 'coapOnly') {
           coapAddresses.push('224.0.1.187')
         }
       }
+
+      return coapAddresses
     }
 
-    function _getcoreRDAddresses () {
-      if (config.coreRDUseIPv6) {
+    function _getcoreRDAddresses (config) {
+      const coreRDAddresses = []
+      const useCoreRD = config.useCoap && config.useCoreRD
+
+      if (useCoreRD && config.coreRDUseIPv6) {
         coreRDAddresses.push('[ff02::fe]')
       }
 
-      if (config.coreRDUseIPv4) {
+      if (useCoreRD && config.coreRDUseIPv4) {
         coreRDAddresses.push('224.0.1.189')
       }
+
+      return coreRDAddresses
     }
 
     /**
