@@ -1,10 +1,10 @@
 node-red-contrib-wot-discovery
 =====================
-![Build Status](https://github.com/JKRhb/node-red-contrib-wot-discovery/workflows/Build%20Status/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/JKRhb/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/JKRhb/node-red-contrib-wot-discovery?branch=main)
+[![Build Status](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml/badge.svg)](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml)
+[![platform](https://img.shields.io/badge/platform-Node--RED-red)](https://flows.nodered.org/node/node-red-contrib-wot-discovery)
+[![NPM version](https://badge.fury.io/js/node-red-contrib-wot-discovery.svg)](https://www.npmjs.com/package/node-red-contrib-wot-discovery)
+[![Coverage Status](https://coveralls.io/repos/github/namib-project/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/namib-project/node-red-contrib-wot-discovery?branch=main)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Dependency Status](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery.png)](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery)
-[![Dev Dependency Status](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery/dev-status.png)](https://david-dm.org/JKRhb/node-red-contrib-wot-discovery#dev-badge-embed)
 
 Experimental Node-RED package for discovery in the Web of Things (WoT).
 It provides a `wot-discovery` node that can be used for discovering and storing WoT Thing Descriptions (TDs) as well as a `wot-scripting` node that serves as an interface to [`node-wot`](https://github.com/eclipse/thingweb.node-wot) for triggering interaction affordances.
