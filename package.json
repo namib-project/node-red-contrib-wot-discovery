@@ -4,6 +4,7 @@
   "description": "An experimental Node-RED package for Discovery in the Web of Things (WoT).",
   "main": "index.js",
   "node-red": {
+    "version": ">=1.3.0",
     "nodes": {
       "wot-discovery": "nodes/wot-discovery.js",
       "wot-scripting": "nodes/wot-scripting.js",
