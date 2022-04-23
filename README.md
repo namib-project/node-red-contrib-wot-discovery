@@ -1,7 +1,7 @@
 node-red-contrib-wot-discovery
 =====================
-![Build Status](https://github.com/JKRhb/node-red-contrib-wot-discovery/workflows/Build%20Status/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/JKRhb/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/JKRhb/node-red-contrib-wot-discovery?branch=main)
+[![Build Status](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml/badge.svg)](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/namib-project/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/namib-project/node-red-contrib-wot-discovery?branch=main)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 Experimental Node-RED package for discovery in the Web of Things (WoT).
