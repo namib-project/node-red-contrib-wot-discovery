@@ -7,7 +7,7 @@
  *
  * The definition of the wot-discovery node.
  *
- * @param {*} RED
+ * @param {*} RED The Node-RED object.
  */
 module.exports = function (RED) {
   'use strict'
@@ -21,7 +21,7 @@ module.exports = function (RED) {
   /**
      * The main function for the wot-discovery node.
      *
-     * @param {*} config
+     * @param {Record<string, any>} config
      */
   function WoTDiscoveryNode (config) {
     RED.nodes.createNode(this, config)
@@ -53,10 +53,12 @@ module.exports = function (RED) {
     }
 
     /**
-        *
-        * @param {*} config whether the node should use coap for discovery.
-        * @return {*} list of multicast addresses to use for discovery.
-        */
+     * Gets a list of well-known multicast IP addresses for CoAP nodes,
+     * depending on the config.
+     *
+     * @param config This node's configuration object.
+     * @returns A list of multicast IP addresses (can be empty).
+     */
     function _getCoapAddresses (config) {
       const coapAddresses = []
       const useCoap = config.useCoap
@@ -80,6 +82,16 @@ module.exports = function (RED) {
       return coapAddresses
     }
 
+    /**
+     * Gets a list of well-known multicast IP addresses for Core
+     * Resource Directories, depending on the config.
+     *
+     * These IP addresses can include `[ff02::fe]` (for IPv6) and/or
+     * `224.0.1.189` (for IPv4).
+     *
+     * @param config This node's configuration object.
+     * @returns A list of multicast IP addresses (can be empty).
+     */
     function _getcoreRDAddresses (config) {
       const coreRDAddresses = []
       const useCoreRD = config.useCoap && config.useCoreRD
@@ -96,10 +108,13 @@ module.exports = function (RED) {
     }
 
     /**
-         *
-         *
-         * @return {*} the context variable, the Thing Descriptions get stored in.
-         */
+     * Gets the context object where Thing Descriptions are stored.
+     *
+     * Depending on the config, this object can either be at the global
+     * or at the flow level.
+     *
+     * @return {Object?} The context object or `null`.
+     */
     function _getContextVar () {
       if (contextVarType === 'flow') {
         return node.context().flow
@@ -198,7 +213,7 @@ module.exports = function (RED) {
              *
              *  Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
              *
-             * @param {*} thingDescriptionJSON the Thing Description in JSON
+             * @param {String} thingDescriptionJSON A Thing Description serialized as a JSON string
              */
       function _processThingDescriptionJSON (thingDescriptionJSON) {
         try {
@@ -260,7 +275,7 @@ module.exports = function (RED) {
       /**
              *  Proceed with the data of the received message if the content format is application/json.
              *
-             * @param {*} res
+             * @param {Object} res A CoAP response object
              */
       function _onResponse (res) {
         res.on('data', (data) => {
@@ -275,8 +290,8 @@ module.exports = function (RED) {
       /**
              *
              *
-             * @param {*} thingDescription
-             * @return {*}
+             * @param {Object} thingDescription
+             * @return {string}
              */
       function _getTDIdentifier (thingDescription) {
         const identifier = thingDescription.id || thingDescription.base || thingDescription.title
@@ -286,8 +301,8 @@ module.exports = function (RED) {
       /**
              * Sends a TD-Discovery to the given address, looking for the given path.
              *
-             * @param {*} address
-             * @param {*} path
+             * @param {string} address
+             * @param {string} path
              */
       function _sendCoapDiscovery (address, path) {
         const reqOpts = url.parse(
@@ -328,7 +343,8 @@ module.exports = function (RED) {
       /**
              *
              * Checks the syntax of the received links from {@ling _getDiscoveryLinks} and uses them for {@link _sendCoapDiscovery}.
-             * @param {*} res
+             * @param {string} linksAsString
+             * @return An array of CoRE Web Links
              */
       function _parseCoreLinkFormat (linksAsString) {
         const links = linksAsString.split(',').map(link => {
@@ -364,7 +380,7 @@ module.exports = function (RED) {
       /**
              *
              *
-             * @param {*} res
+             * @param {IncomingMessage} res
              */
       function _coreResponse (res) {
         res.on('data', (data) => {
