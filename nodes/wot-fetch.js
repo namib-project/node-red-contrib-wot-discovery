@@ -3,7 +3,14 @@
  * @module node-red-contrib-wot-discovery/wot-fetch
  */
 
+/**
+ *
+ * The definition of the wot-fetch node.
+ *
+ * @param {*} RED The Node-RED object.
+ */
 module.exports = function (RED) {
+  'use strict'
   const { Servient, Helpers } = require('@node-wot/core')
   const {
     HttpClientFactory,

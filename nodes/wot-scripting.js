@@ -7,7 +7,7 @@
  *
  * The definition of the wot-scripting node.
  *
- * @param {*} RED
+ * @param {*} RED The Node-RED object.
  */
 module.exports = function (RED) {
   'use strict'
@@ -40,11 +40,11 @@ module.exports = function (RED) {
   const { MqttClientFactory } = require('@node-wot/binding-mqtt')
 
   /**
-     * Maps the possible operation types to their kind of affordance
-     *
-     * @type {Object.<string, string>}
-     * @constant
-     */
+   * Maps the possible operation types to their kind of affordance
+   *
+   * @type {Object.<string, string>}
+   * @constant
+   */
   const operationsToAffordanceType = {
     readProperty: 'properties',
     writeProperty: 'properties',
@@ -54,16 +54,16 @@ module.exports = function (RED) {
   }
 
   /**
-     *
-     * @type {Object.<string, Servient>}
-     */
+   *
+   * @type {Object.<string, Servient>}
+   */
   const thingCache = {}
 
   /**
-     *
-     *
-     * @param {Object} config
-     */
+   *
+   *
+   * @param {Object} config
+   */
   function WoTScriptingNode (config) {
     RED.nodes.createNode(this, config)
     const node = this
@@ -180,17 +180,17 @@ module.exports = function (RED) {
     }
 
     /**
-         * Serially perform multiple operations on a device
-         *
-         * @param {Object} thing The recent thing description
-         * @param {String} operationType The operation that shall be performed
-         * @param {String} affordanceName The name of the affordance the operation shall be performed on
-         * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
-         * @param {*} inputValue A value that will be sent in the operation (depending on the type)
-         * @param {String} outputVar An attribute name the returned value will be written to
-         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
-         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
-         */
+     * Serially perform multiple operations on a device
+     *
+     * @param {Object} thing The recent thing description
+     * @param {String} operationType The operation that shall be performed
+     * @param {String} affordanceName The name of the affordance the operation shall be performed on
+     * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
+     * @param {*} inputValue A value that will be sent in the operation (depending on the type)
+     * @param {String} outputVar An attribute name the returned value will be written to
+     * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+     * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+     */
     function performOperationsOnThing (foundAffordances, consumedThing, operationType, msg, inputValue, outputVar, outputVarType, outputPayload) {
       foundAffordances.forEach((affordance) => {
         performOperationOnThing(
@@ -208,17 +208,17 @@ module.exports = function (RED) {
 
     // TODO: This signature has to be shortened
     /**
-         * Actually perform the operation that has been chosen on the device
-         *
-         * @param {Object} thing The recent thing description
-         * @param {String} operationType The operation that shall be performed
-         * @param {String} affordanceName The name of the affordance the operation shall be performed on
-         * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
-         * @param {*} inputValue A value that will be sent in the operation (depending on the type)
-         * @param {String} outputVar An attribute name the returned value will be written to
-         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
-         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
-         */
+     * Actually perform the operation that has been chosen on the device
+     *
+     * @param {Object} thing The recent thing description
+     * @param {String} operationType The operation that shall be performed
+     * @param {String} affordanceName The name of the affordance the operation shall be performed on
+     * @param {Object} msg The message that will be sent. It may be modified and will be sent at the end of the operation
+     * @param {*} inputValue A value that will be sent in the operation (depending on the type)
+     * @param {String} outputVar An attribute name the returned value will be written to
+     * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+     * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+     */
     function performOperationOnThing (thing, operationType, affordanceName, msg, inputValue, outputVar, outputVarType, outputPayload) {
       // TODO: This signature has to be shortened
       const thingDescription = thing.getThingDescription()
@@ -269,12 +269,12 @@ module.exports = function (RED) {
     }
 
     /**
-         * Get the constant value of an action
-         *
-         * @param {Object} thingDescription
-         * @param {String} affordanceName The affordanceName of the action
-         * @return {Number} The Value or null if an error occurred
-         */
+     * Get the constant value of an action
+     *
+     * @param {Object} thingDescription
+     * @param {String} affordanceName The affordanceName of the action
+     * @return {Number} The Value or null if an error occurred
+     */
     function _getConstValueInput (thingDescription, affordanceName) {
       try {
         const affordance = thingDescription.actions[affordanceName]
@@ -285,14 +285,14 @@ module.exports = function (RED) {
     }
 
     /**
-         * Handle the output of the device
-         *
-         * @param {Object} msg The message this node will send
-         * @param {Object} output The output received by the device
-         * @param {String} outputVar The attribute's name the output is going to be saved
-         * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
-         * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
-         */
+     * Handle the output of the device
+     *
+     * @param {Object} msg The message this node will send
+     * @param {Object} output The output received by the device
+     * @param {String} outputVar The attribute's name the output is going to be saved
+     * @param {String} outputVarType The place the data is going to be written to. Either "msg", "flow" or "global"
+     * @param {Boolean} outputPayload Shall the data be written to "msg.payload" as well?
+     */
     function _handleOutput (msg, output, outputVar, outputVarType, outputPayload) {
       if (output != null) {
         switch (outputVarType) {
@@ -316,11 +316,11 @@ module.exports = function (RED) {
     }
 
     /**
-         * Get id, base URL and the title of a thing description
-         *
-         * @param {Object} thingDescription Object as provided by the WoT Discovery node
-         * @return {Object} Identifier object providing the attributes id, base and title
-         */
+     * Get id, base URL and the title of a thing description
+     *
+     * @param {Object} thingDescription Object as provided by the WoT Discovery node
+     * @return {Object} Identifier object providing the attributes id, base and title
+     */
     function _getTDIdentifier (thingDescription) {
       const identifier =
                 thingDescription.id ||

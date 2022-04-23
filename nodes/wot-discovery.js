@@ -7,7 +7,7 @@
  *
  * The definition of the wot-discovery node.
  *
- * @param {*} RED
+ * @param {*} RED The Node-RED object.
  */
 module.exports = function (RED) {
   'use strict'
@@ -19,15 +19,15 @@ module.exports = function (RED) {
   const mqttDiscoveryTopic = mqttDiscoveryTopicBase + '/#'
 
   /**
-     * The main function for the wot-discovery node.
-     *
-     * @param {*} config
-     */
+   * The main function for the wot-discovery node.
+   *
+   * @param {Record<string, any>} config
+   */
   function WoTDiscoveryNode (config) {
     RED.nodes.createNode(this, config)
     const node = this
-    const coapAddresses = []
-    const coreRDAddresses = []
+    const coapAddresses = _getCoapAddresses(config)
+    const coreRDAddresses = _getcoreRDAddresses(config)
 
     const contextVarKey = config.contextVar || 'thingDescriptions'
     const contextVarType = config.contextVarType
@@ -45,14 +45,6 @@ module.exports = function (RED) {
 
     // TODO: Add Implementations for MQTT
 
-    if (config.useCoap) {
-      _getCoapAddresses()
-
-      if (config.useCoreRD) {
-        _getcoreRDAddresses()
-      }
-    }
-
     if (msgOrContext === 'context' || msgOrContext === 'both') {
       const contextVar = _getContextVar()
       if (!contextVar.get(contextVarKey)) {
@@ -61,12 +53,17 @@ module.exports = function (RED) {
     }
 
     /**
-        *
-        * @param {*} config whether the node should use coap for discovery.
-        * @return {*} list of multicast addresses to use for discovery.
-        */
-    function _getCoapAddresses () {
-      if (config.coapUseIPv6) {
+     * Gets a list of well-known multicast IP addresses for CoAP nodes,
+     * depending on the config.
+     *
+     * @param config This node's configuration object.
+     * @returns A list of multicast IP addresses (can be empty).
+     */
+    function _getCoapAddresses (config) {
+      const coapAddresses = []
+      const useCoap = config.useCoap
+
+      if (useCoap && config.coapUseIPv6) {
         if (config.coapIPv6Address === 'all') {
           coapAddresses.push('[ff02::1]')
         } else if (config.coapIPv6Address === 'coapOnly') {
@@ -74,30 +71,50 @@ module.exports = function (RED) {
         }
       }
 
-      if (config.coapUseIPv4) {
+      if (useCoap && config.coapUseIPv4) {
         if (config.coapIPv4Address === 'all') {
           coapAddresses.push('224.0.0.1')
         } else if (config.coapIPv4Address === 'coapOnly') {
           coapAddresses.push('224.0.1.187')
         }
       }
-    }
 
-    function _getcoreRDAddresses () {
-      if (config.coreRDUseIPv6) {
-        coreRDAddresses.push('[ff02::fe]')
-      }
-
-      if (config.coreRDUseIPv4) {
-        coreRDAddresses.push('224.0.1.189')
-      }
+      return coapAddresses
     }
 
     /**
-         *
-         *
-         * @return {*} the context variable, the Thing Descriptions get stored in.
-         */
+     * Gets a list of well-known multicast IP addresses for Core
+     * Resource Directories, depending on the config.
+     *
+     * These IP addresses can include `[ff02::fe]` (for IPv6) and/or
+     * `224.0.1.189` (for IPv4).
+     *
+     * @param config This node's configuration object.
+     * @returns A list of multicast IP addresses (can be empty).
+     */
+    function _getcoreRDAddresses (config) {
+      const coreRDAddresses = []
+      const useCoreRD = config.useCoap && config.useCoreRD
+
+      if (useCoreRD && config.coreRDUseIPv6) {
+        coreRDAddresses.push('[ff02::fe]')
+      }
+
+      if (useCoreRD && config.coreRDUseIPv4) {
+        coreRDAddresses.push('224.0.1.189')
+      }
+
+      return coreRDAddresses
+    }
+
+    /**
+     * Gets the context object where Thing Descriptions are stored.
+     *
+     * Depending on the config, this object can either be at the global
+     * or at the flow level.
+     *
+     * @return {Object?} The context object or `null`.
+     */
     function _getContextVar () {
       if (contextVarType === 'flow') {
         return node.context().flow
@@ -193,11 +210,11 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *  Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
-             *
-             * @param {*} thingDescriptionJSON the Thing Description in JSON
-             */
+       *
+       * Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
+       *
+       * @param {String} thingDescriptionJSON A Thing Description serialized as a JSON string
+       */
       function _processThingDescriptionJSON (thingDescriptionJSON) {
         try {
           const thingDescription = JSON.parse(thingDescriptionJSON.toString())
@@ -209,12 +226,12 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *  Stores the given Thing Description in the given context or sends it as message.
-             *
-             * @param {*} thingDescription
-             * @return {*}
-             */
+       *
+       * Stores the given Thing Description in the given context or sends it as message.
+       *
+       * @param {*} thingDescription
+       * @return {*}
+       */
       function _processThingDescription (thingDescription) {
         if (msgOrContext === 'msg' || msgOrContext === 'both') {
           msg[tdMsgProperty] = thingDescription
@@ -245,9 +262,9 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Resets the current context variable.
-             */
+       *
+       * Resets the current context variable.
+       */
       function _resetContextVar () {
         const contextVar = _getContextVar()
         if (contextVar !== null) {
@@ -256,10 +273,11 @@ module.exports = function (RED) {
       }
 
       /**
-             *  Proceed with the data of the received message if the content format is application/json.
-             *
-             * @param {*} res
-             */
+       * Proceed with the data of the received message if the content format is
+       * application/json.
+       *
+       * @param {Object} res A CoAP response object
+       */
       function _onResponse (res) {
         res.on('data', (data) => {
           const allowedContentFormats = ['application/json', 'application/td+json']
@@ -271,22 +289,22 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *
-             * @param {*} thingDescription
-             * @return {*}
-             */
+       *
+       *
+       * @param {Object} thingDescription
+       * @return {string}
+       */
       function _getTDIdentifier (thingDescription) {
         const identifier = thingDescription.id || thingDescription.base || thingDescription.title
         return identifier
       }
 
       /**
-             * Sends a TD-Discovery to the given address, looking for the given path.
-             *
-             * @param {*} address
-             * @param {*} path
-             */
+       * Sends a TD-Discovery to the given address, looking for the given path.
+       *
+       * @param {string} address
+       * @param {string} path
+       */
       function _sendCoapDiscovery (address, path) {
         const reqOpts = url.parse(
                     `coap://${address}${path}`
@@ -305,9 +323,10 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Discovers all links from /.well-known/core that have the resource type wot.thing based on {@link coapAddresses}.
-             */
+       *
+       * Discovers all links from /.well-known/core that have the resource type
+       * wot.thing based on {@link coapAddresses}.
+       */
       function _getDiscoveryLinks (address) {
         const reqOpts = url.parse(`coap://${address}/.well-known/core`)
         reqOpts.pathname = reqOpts.path
@@ -324,10 +343,13 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Checks the syntax of the received links from {@ling _getDiscoveryLinks} and uses them for {@link _sendCoapDiscovery}.
-             * @param {*} res
-             */
+       *
+       * Checks the syntax of the received links from {@ling _getDiscoveryLinks}
+       * and uses them for {@link _sendCoapDiscovery}.
+       *
+       * @param {string} linksAsString
+       * @return An array of CoRE Web Links
+       */
       function _parseCoreLinkFormat (linksAsString) {
         const links = linksAsString.split(',').map(link => {
           return link.split(';')
@@ -360,10 +382,10 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *
-             * @param {*} res
-             */
+       *
+       *
+       * @param {IncomingMessage} res
+       */
       function _coreResponse (res) {
         res.on('data', (data) => {
           if (res.headers['Content-Format'] === 'application/link-format') {
