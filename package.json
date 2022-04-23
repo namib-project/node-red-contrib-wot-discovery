@@ -60,7 +60,8 @@
     "@node-wot/binding-http": "^0.7.6",
     "@node-wot/binding-mqtt": "^0.7.6",
     "@node-wot/core": "^0.7.6",
-    "coap": "^1.0.1"
+    "coap": "^1.0.1",
+    "uri-js": "^4.4.1"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
