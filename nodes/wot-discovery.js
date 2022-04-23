@@ -19,10 +19,10 @@ module.exports = function (RED) {
   const mqttDiscoveryTopic = mqttDiscoveryTopicBase + '/#'
 
   /**
-     * The main function for the wot-discovery node.
-     *
-     * @param {Record<string, any>} config
-     */
+   * The main function for the wot-discovery node.
+   *
+   * @param {Record<string, any>} config
+   */
   function WoTDiscoveryNode (config) {
     RED.nodes.createNode(this, config)
     const node = this
@@ -210,11 +210,11 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *  Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
-             *
-             * @param {String} thingDescriptionJSON A Thing Description serialized as a JSON string
-             */
+       *
+       * Parses the Thing Description to an object and and calls {@link _processThingDescription} on it.
+       *
+       * @param {String} thingDescriptionJSON A Thing Description serialized as a JSON string
+       */
       function _processThingDescriptionJSON (thingDescriptionJSON) {
         try {
           const thingDescription = JSON.parse(thingDescriptionJSON.toString())
@@ -226,12 +226,12 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *  Stores the given Thing Description in the given context or sends it as message.
-             *
-             * @param {*} thingDescription
-             * @return {*}
-             */
+       *
+       * Stores the given Thing Description in the given context or sends it as message.
+       *
+       * @param {*} thingDescription
+       * @return {*}
+       */
       function _processThingDescription (thingDescription) {
         if (msgOrContext === 'msg' || msgOrContext === 'both') {
           msg[tdMsgProperty] = thingDescription
@@ -262,9 +262,9 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Resets the current context variable.
-             */
+       *
+       * Resets the current context variable.
+       */
       function _resetContextVar () {
         const contextVar = _getContextVar()
         if (contextVar !== null) {
@@ -273,10 +273,11 @@ module.exports = function (RED) {
       }
 
       /**
-             *  Proceed with the data of the received message if the content format is application/json.
-             *
-             * @param {Object} res A CoAP response object
-             */
+       * Proceed with the data of the received message if the content format is
+       * application/json.
+       *
+       * @param {Object} res A CoAP response object
+       */
       function _onResponse (res) {
         res.on('data', (data) => {
           const allowedContentFormats = ['application/json', 'application/td+json']
@@ -288,22 +289,22 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *
-             * @param {Object} thingDescription
-             * @return {string}
-             */
+       *
+       *
+       * @param {Object} thingDescription
+       * @return {string}
+       */
       function _getTDIdentifier (thingDescription) {
         const identifier = thingDescription.id || thingDescription.base || thingDescription.title
         return identifier
       }
 
       /**
-             * Sends a TD-Discovery to the given address, looking for the given path.
-             *
-             * @param {string} address
-             * @param {string} path
-             */
+       * Sends a TD-Discovery to the given address, looking for the given path.
+       *
+       * @param {string} address
+       * @param {string} path
+       */
       function _sendCoapDiscovery (address, path) {
         const reqOpts = url.parse(
                     `coap://${address}${path}`
@@ -322,9 +323,10 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Discovers all links from /.well-known/core that have the resource type wot.thing based on {@link coapAddresses}.
-             */
+       *
+       * Discovers all links from /.well-known/core that have the resource type
+       * wot.thing based on {@link coapAddresses}.
+       */
       function _getDiscoveryLinks (address) {
         const reqOpts = url.parse(`coap://${address}/.well-known/core`)
         reqOpts.pathname = reqOpts.path
@@ -341,11 +343,13 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             * Checks the syntax of the received links from {@ling _getDiscoveryLinks} and uses them for {@link _sendCoapDiscovery}.
-             * @param {string} linksAsString
-             * @return An array of CoRE Web Links
-             */
+       *
+       * Checks the syntax of the received links from {@ling _getDiscoveryLinks}
+       * and uses them for {@link _sendCoapDiscovery}.
+       *
+       * @param {string} linksAsString
+       * @return An array of CoRE Web Links
+       */
       function _parseCoreLinkFormat (linksAsString) {
         const links = linksAsString.split(',').map(link => {
           return link.split(';')
@@ -378,10 +382,10 @@ module.exports = function (RED) {
       }
 
       /**
-             *
-             *
-             * @param {IncomingMessage} res
-             */
+       *
+       *
+       * @param {IncomingMessage} res
+       */
       function _coreResponse (res) {
         res.on('data', (data) => {
           if (res.headers['Content-Format'] === 'application/link-format') {
