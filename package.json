@@ -70,5 +70,8 @@
     "node-red-node-test-helper": "^0.2.5",
     "nyc": "^15.1.0",
     "standard": "^16.0.3"
+  },
+  "engines": {
+    "node": ">=12"
   }
 }
