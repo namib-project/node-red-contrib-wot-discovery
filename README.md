@@ -1,6 +1,8 @@
 node-red-contrib-wot-discovery
 =====================
 [![Build Status](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml/badge.svg)](https://github.com/namib-project/node-red-contrib-wot-discovery/actions/workflows/npm-test.yml)
+[![platform](https://img.shields.io/badge/platform-Node--RED-red)](https://flows.nodered.org/node/node-red-contrib-wot-discovery)
+[![NPM version](https://badge.fury.io/js/node-red-contrib-wot-discovery.svg)](https://www.npmjs.com/package/node-red-contrib-wot-discovery)
 [![Coverage Status](https://coveralls.io/repos/github/namib-project/node-red-contrib-wot-discovery/badge.svg?branch=main)](https://coveralls.io/github/namib-project/node-red-contrib-wot-discovery?branch=main)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
