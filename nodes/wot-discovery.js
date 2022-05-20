@@ -179,6 +179,9 @@ module.exports = function (RED) {
                   const reqOpts = url.parse(
                                         `coap://${address}${uri.path}?rt=wot.thing`
                   )
+                  if (reqOpts.port == null) {
+                    reqOpts.port = 5683
+                  }
                   reqOpts.pathname = reqOpts.path
                   reqOpts.method = 'GET'
                   const req = coap.request(reqOpts)
