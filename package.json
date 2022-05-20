@@ -58,7 +58,7 @@
   "homepage": "https://github.com/namib-project/node-red-contrib-wot-discovery#readme",
   "dependencies": {
     "@node-wot/binding-coap": "^0.7.6",
-    "@node-wot/binding-http": "^0.7.6",
+    "@node-wot/binding-http": "^0.8.1",
     "@node-wot/binding-mqtt": "^0.7.6",
     "@node-wot/core": "^0.7.6",
     "coap": "^1.0.1",
