@@ -206,6 +206,16 @@ module.exports = function (RED) {
       })
     }
 
+    /**
+     *  Asyncronously resolve an InteractionOutput.
+     *
+     * @param {InteractionOutput} output The output to resolve.
+     * @return The resolved output.
+     */
+    async function _resolveOutput (output) {
+      return await output.value()
+    }
+
     // TODO: This signature has to be shortened
     /**
      * Actually perform the operation that has been chosen on the device
@@ -224,7 +234,7 @@ module.exports = function (RED) {
       const thingDescription = thing.getThingDescription()
       switch (operationType) {
         case 'readProperty':
-          thing.readProperty(affordanceName).then(output => {
+          thing.readProperty(affordanceName).then(_resolveOutput).then(output => {
             _handleOutput(msg, output, outputVar, outputVarType, outputPayload)
           }).catch(error => node.error(error))
           break
@@ -233,12 +243,12 @@ module.exports = function (RED) {
             node.error('No input value given!')
             return
           }
-          thing.writeProperty(affordanceName, inputValue).then(output => {
+          thing.writeProperty(affordanceName, inputValue).then(_resolveOutput).then(output => {
             _handleOutput(msg, output, outputVar, outputVarType, outputPayload)
           }).catch(error => node.error(error))
           break
         case 'observeProperty':
-          thing.observeProperty(affordanceName).then(output => {
+          thing.observeProperty(affordanceName).then(_resolveOutput).then(output => {
             _handleOutput(msg, output, outputVar, outputVarType, outputPayload)
           }).catch(error => node.error(error))
           break
@@ -252,13 +262,13 @@ module.exports = function (RED) {
           } else {
             invokedAction = thing.invokeAction(affordanceName)
           }
-          invokedAction.then(output => {
+          invokedAction.then(_resolveOutput).then(output => {
             _handleOutput(msg, output, outputVar, outputVarType, outputPayload)
           }).catch(error => node.error(error))
           break
         }
         case 'subscribeEvent':
-          thing.subscribeEvent(affordanceName).then(output => {
+          thing.subscribeEvent(affordanceName).then(_resolveOutput).then(output => {
             _handleOutput(msg, output, outputVar, outputVarType, outputPayload)
           }).catch(error => node.error(error))
           break
