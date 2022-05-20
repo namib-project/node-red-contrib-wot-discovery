@@ -57,7 +57,7 @@ describe('WoTDiscoveryNode', function () {
         function endTestNode (RED) {
           function EndTestNode (n) {
             RED.nodes.createNode(this, n)
-            this.on('input', function (msg) {
+            this.once('input', function (msg) {
               msg.thingDescription
                 .should.eql({ blah: 'hi' }) // Not a valid TD yet...
               done()
