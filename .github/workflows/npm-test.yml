@@ -33,9 +33,7 @@ jobs:
         npm ci
 
     - name: Perform tests and generate coverage report
-      run: |
-        npm test
-        npm run coverage
+      run: npm run coverage
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
