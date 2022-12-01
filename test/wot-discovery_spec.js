@@ -72,10 +72,10 @@ describe('WoTDiscoveryNode', function () {
         const settings = { reuseAddr: true }
 
         if (iterationData.type === 'IPv6') {
-          if (process.platform === 'darwin') {
-            // FIXME: IPv6 multicast apparently does not work on macOS
-            this.skip()
-          }
+          // if (process.platform === 'darwin') {
+          // FIXME: IPv6 multicast apparently does not work on macOS
+          this.skip()
+          // }
 
           settings.type = 'udp6'
           settings.multicastAddress = 'ff02::1'
@@ -146,10 +146,10 @@ describe('WoTDiscoveryNode', function () {
         const settings = { reuseAddr: true }
 
         if (iterationData.type === 'IPv6') {
-          if (process.platform === 'darwin') {
-            // FIXME: IPv6 multicast apparently does not work on macOS
-            this.skip()
-          }
+          // if (process.platform === 'darwin') {
+          // FIXME: IPv6 multicast apparently does not work on macOS
+          this.skip()
+          // }
 
           settings.type = 'udp6'
           settings.multicastAddress = 'ff02::fe'
