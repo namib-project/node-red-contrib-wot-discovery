@@ -57,10 +57,10 @@
   },
   "homepage": "https://github.com/namib-project/node-red-contrib-wot-discovery#readme",
   "dependencies": {
-    "@node-wot/binding-coap": "^0.8.2",
-    "@node-wot/binding-http": "^0.8.2",
-    "@node-wot/binding-mqtt": "^0.8.2",
-    "@node-wot/core": "^0.8.2",
+    "@node-wot/binding-coap": "^0.8.5",
+    "@node-wot/binding-http": "^0.8.5",
+    "@node-wot/binding-mqtt": "^0.8.5",
+    "@node-wot/core": "^0.8.5",
     "coap": "^1.0.11",
     "uri-js": "^4.4.1"
   },
