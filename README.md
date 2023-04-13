@@ -26,7 +26,7 @@ You can choose between the multicast addresses for all IPv4/IPv6 nodes or the re
 
 Supported methods for CoAP so far include:
 
-- Discovery from `/.well-known/wot-thing-discription`.
+- Discovery from `/.well-known/wot`.
 - Discovery using the CoRE Link Format and `/.well-known/core` (the correct content type and resource type has to be set in the list of links).
 - Discovery from CoRE Resource Directories. For this method, available Resource Directories are discovered first which are then queried for links pointing to TDs.
 
