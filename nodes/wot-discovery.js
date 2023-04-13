@@ -131,7 +131,7 @@ module.exports = function (RED) {
 
       coapAddresses.forEach(address => {
         if (tdURI) {
-          _sendCoapDiscovery(address, '/.well-known/wot-thing-description')
+          _sendCoapDiscovery(address, '/.well-known/wot')
         }
         if (coreURI) {
           _getDiscoveryLinks(address)
